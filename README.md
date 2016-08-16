@@ -56,7 +56,9 @@ In your `config/scout.php` add:
 ## Usage
 
 After you have installed scout and the TNTSearch driver, you need to add the
-`Searchable` trait to your models that you want to make searchable
+`Searchable` trait to your models that you want to make searchable. Additionaly,
+define the fields you want to make searchable by setting the `searchable` member
+variable.
 
 ```php
 <?php
@@ -69,6 +71,8 @@ use Laravel\Scout\Searchable;
 class Post extends Model
 {
     use Searchable;
+
+    public $searchable = ['title', 'content'];
 }
 ```
 

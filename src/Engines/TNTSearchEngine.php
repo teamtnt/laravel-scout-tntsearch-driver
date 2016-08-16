@@ -30,14 +30,16 @@ class TNTSearchEngine extends Engine
      */
     public function update($models)
     {
-        $this->initIndex($models->first()->searchableAs());
+        $this->initIndex($models->first());
         $models->each(function ($model) {
+            $searchableFields = $this->getSearchableFields($model);
+
             $this->tnt->selectIndex("{$model->searchableAs()}.index");
             $index = $this->tnt->getIndex();
             if ($model->getKey()) {
-                $index->update($model->getKey(), $model->toSearchableArray());
+                $index->update($model->getKey(), $searchableFields);
             } else {
-                $index->insert($model->toSearchableArray());
+                $index->insert($searchableFields);
             }
         });
     }
@@ -51,7 +53,7 @@ class TNTSearchEngine extends Engine
      */
     public function delete($models)
     {
-        $this->initIndex($models->first()->searchableAs());
+        $this->initIndex($models->first());
         $models->each(function ($model) {
             $this->tnt->selectIndex("{$model->searchableAs()}.index");
             $index = $this->tnt->getIndex();
@@ -139,12 +141,28 @@ class TNTSearchEngine extends Engine
         });
     }
 
-    public function initIndex($indexName)
+    public function getSearchableFields($model)
     {
+        $searchableFields = [];
+        $model->searchable[] = 'id';
+
+        foreach ($model->toSearchableArray() as $field => $value) {
+            if(in_array($field, $model->searchable)) {
+                $searchableFields[$field] = $value;
+            }
+        }
+        return $searchableFields;
+    }
+
+    public function initIndex($model)
+    {
+        $indexName = $model->searchableAs();
+
         if (!file_exists($this->tnt->config['storage'] . "/{$indexName}.index")) {
             $indexer                = $this->tnt->createIndex("$indexName.index");
             $indexer->disableOutput = true;
-            $indexer->query("SELECT * FROM $indexName");
+            $fields = implode(", ", $model->searchable);
+            $indexer->query("SELECT id, $fields FROM $indexName");
             $indexer->run();
         }
     }

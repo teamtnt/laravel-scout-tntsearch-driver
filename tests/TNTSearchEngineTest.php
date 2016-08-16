@@ -32,6 +32,8 @@ class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
 
 class TNTSearchEngineTestModel
 {
+    public $searchable = ['title'];
+    
     public function searchableAs()
     {
         return 'table';
