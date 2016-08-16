@@ -40,6 +40,47 @@ You must install the service provider:
     TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
 ],
 ```
+To your `.env` file add `SCOUT_DRIVER=tntsearch`
+
+In your `config/scout.php` add:
+
+```php
+'tntsearch' => [
+    'driver'   => env('DB_CONNECTION', 'mysql'),
+    'host'     => env('DB_HOST', 'localhost'),
+    'database' => env('DB_DATABASE'),
+    'username' => env('DB_USERNAME'),
+    'password' => env('DB_PASSWORD'),
+    'storage'  => storage_path(),
+],
+```
+
+## Usage
+
+After you have installed scout and the TNTSearch driver, you need to add the
+`Searchable` trait to your models that you want to make searchable
+
+```php
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
+
+class Post extends Model
+{
+    use Searchable;
+}
+```
+
+Then, sync the data with the serach service like:
+
+`php artisan scout:import App\\Post`
+
+After that you can search your models with:
+
+`Post::search('Bugs Bunny')->get();`
 
 ## Contributing
 
