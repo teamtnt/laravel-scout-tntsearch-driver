@@ -16,8 +16,10 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app[EngineManager::class]->extend('tntsearch', function () {
+            $driver = config('database.default');
             $tnt = new TNTSearch();
-            $tnt->loadConfig(config('scout.tntsearch'));
+            $config = config('scout.tntsearch') + config("database.connections.$driver");
+            $tnt->loadConfig($config);
 
             return new Engines\TNTSearchEngine($tnt);
         });

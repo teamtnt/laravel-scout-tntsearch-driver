@@ -41,12 +41,7 @@ In your `config/scout.php` add:
 
 ```php
 'tntsearch' => [
-    'driver'   => env('DB_CONNECTION', 'mysql'),
-    'host'     => env('DB_HOST', 'localhost'),
-    'database' => env('DB_DATABASE'),
-    'username' => env('DB_USERNAME'),
-    'password' => env('DB_PASSWORD'),
-    'storage'  => storage_path(),
+    'storage'  => storage_path(), //place where the index files will be stored
 ],
 ```
 
