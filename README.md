@@ -12,9 +12,7 @@ This package makes it easy to add full text search support to your models with L
 ## Contents
 
 - [Installation](#installation)
-    - [Setting up the TNTSearch Scout Driver](#setting-up-tntsearch-scout-driver)
 - [Usage](#usage)
-    - [Bla bla bla](#bla-bla-bla)
 - [Changelog](#changelog)
 - [Testing](#testing)
 - [Security](#security)
