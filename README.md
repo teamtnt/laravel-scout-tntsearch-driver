@@ -1,4 +1,4 @@
-# TNTSearch Driver for Laravel Scout - Laravel 5.3 [WIP]
+# TNTSearch Driver for Laravel Scout - Laravel 5.3
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/teamtnt/laravel-scout-tntsearch-driver.svg?style=flat-square)](https://packagist.org/packages/teamtnt/laravel-scout-tntsearch-driver)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
@@ -38,7 +38,7 @@ You must install the service provider:
     TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
 ],
 ```
-To your `.env` file add `SCOUT_DRIVER=tntsearch`
+Add  `SCOUT_DRIVER=tntsearch` to your `.env` file
 
 In your `config/scout.php` add:
 
@@ -72,7 +72,7 @@ class Post extends Model
 }
 ```
 
-Then, sync the data with the serach service like:
+Then, sync the data with the search service like:
 
 `php artisan scout:import App\\Post`
 
