@@ -26,7 +26,7 @@ You can install the package via composer:
 composer require teamtnt/laravel-scout-tntsearch-driver
 ```
 
-You must install the service provider:
+Add the service provider:
 
 ```php
 // config/app.php
