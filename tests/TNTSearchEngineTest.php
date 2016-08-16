@@ -1,7 +1,5 @@
 <?php
 
-use TeamTNT\Scout\Engines\TNTSearchEngine;
-use Illuminate\Database\Eloquent\Collection;
 
 class AlgoliaEngineTest extends PHPUnit_Framework_TestCase
 {
