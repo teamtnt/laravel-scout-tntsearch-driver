@@ -114,7 +114,7 @@ class TNTSearchEngine extends Engine
     protected function filters(Builder $builder)
     {
         return collect($builder->wheres)->map(function ($value, $key) {
-            return $key . '=' . $value;
+            return $key.'='.$value;
         })->values()->all();
     }
 
@@ -131,7 +131,7 @@ class TNTSearchEngine extends Engine
         if (count($results['ids']) === 0) {
             return Collection::make();
         }
-        $keys   = collect($results['ids']);
+        $keys = collect($results['ids']);
         $models = $model->whereIn(
             $model->getKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
@@ -147,10 +147,11 @@ class TNTSearchEngine extends Engine
         $model->searchable[] = 'id';
 
         foreach ($model->toSearchableArray() as $field => $value) {
-            if(in_array($field, $model->searchable)) {
+            if (in_array($field, $model->searchable)) {
                 $searchableFields[$field] = $value;
             }
         }
+
         return $searchableFields;
     }
 
@@ -158,10 +159,10 @@ class TNTSearchEngine extends Engine
     {
         $indexName = $model->searchableAs();
 
-        if (!file_exists($this->tnt->config['storage'] . "/{$indexName}.index")) {
-            $indexer                = $this->tnt->createIndex("$indexName.index");
+        if (!file_exists($this->tnt->config['storage']."/{$indexName}.index")) {
+            $indexer = $this->tnt->createIndex("$indexName.index");
             $indexer->disableOutput = true;
-            $fields = implode(", ", $model->searchable);
+            $fields = implode(', ', $model->searchable);
             $indexer->query("SELECT id, $fields FROM $indexName");
             $indexer->run();
         }

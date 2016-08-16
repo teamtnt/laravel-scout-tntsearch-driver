@@ -26,14 +26,14 @@ class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
         $index->shouldReceive('update');
 
         $engine = new TNTSearchEngine($client);
-        $engine->update(Collection::make([new TNTSearchEngineTestModel]));
+        $engine->update(Collection::make([new TNTSearchEngineTestModel()]));
     }
 }
 
 class TNTSearchEngineTestModel
 {
     public $searchable = ['title'];
-    
+
     public function searchableAs()
     {
         return 'table';
