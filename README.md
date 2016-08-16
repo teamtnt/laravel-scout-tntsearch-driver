@@ -13,9 +13,6 @@ This package makes it easy to add full text search support to your models with L
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Changelog](#changelog)
-- [Testing](#testing)
-- [Security](#security)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [License](#license)
