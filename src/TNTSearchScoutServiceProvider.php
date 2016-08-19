@@ -19,9 +19,10 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
             $tnt = new TNTSearch();
             $driver = config('database.default');
             $config = config('scout.tntsearch') + config("database.connections.$driver");
-            
+
             $tnt->loadConfig($config);
             $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
+
             return new Engines\TNTSearchEngine($tnt);
         });
     }
