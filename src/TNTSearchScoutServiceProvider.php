@@ -5,6 +5,7 @@ namespace TeamTNT\Scout;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
 use TeamTNT\TNTSearch\TNTSearch;
+use DB;
 
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
@@ -16,10 +17,12 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app[EngineManager::class]->extend('tntsearch', function () {
-            $driver = config('database.default');
             $tnt = new TNTSearch();
+            $driver = config('database.default');
             $config = config('scout.tntsearch') + config("database.connections.$driver");
+            
             $tnt->loadConfig($config);
+            $tnt->setDatabaseHandle(DB::connection()->getPdo());
 
             return new Engines\TNTSearchEngine($tnt);
         });

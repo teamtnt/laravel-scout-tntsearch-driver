@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\TNTSearch;
+use DB;
 
 class TNTSearchEngine extends Engine
 {
@@ -161,6 +162,7 @@ class TNTSearchEngine extends Engine
 
         if (!file_exists($this->tnt->config['storage']."/{$indexName}.index")) {
             $indexer = $this->tnt->createIndex("$indexName.index");
+            $indexer->setDatabaseHandle(DB::connection()->getPdo());
             $indexer->disableOutput = true;
             $fields = implode(', ', $model->searchable);
             $indexer->query("SELECT id, $fields FROM $indexName");
