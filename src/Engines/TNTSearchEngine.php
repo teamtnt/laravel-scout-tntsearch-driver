@@ -36,6 +36,7 @@ class TNTSearchEngine extends Engine
 
             $this->tnt->selectIndex("{$model->searchableAs()}.index");
             $index = $this->tnt->getIndex();
+            $index->setPrimaryKey($model->getKeyName());
             if ($model->getKey()) {
                 $index->update($model->getKey(), $searchableFields);
             } else {
@@ -57,6 +58,7 @@ class TNTSearchEngine extends Engine
         $models->each(function ($model) {
             $this->tnt->selectIndex("{$model->searchableAs()}.index");
             $index = $this->tnt->getIndex();
+            $index->setPrimaryKey($model->getKeyName());
             $index->delete($model->id);
         });
     }
@@ -144,7 +146,7 @@ class TNTSearchEngine extends Engine
     public function getSearchableFields($model)
     {
         $searchableFields = [];
-        $model->searchable[] = 'id';
+        $model->searchable[] = $model->getKeyName();
 
         foreach ($model->toSearchableArray() as $field => $value) {
             if (in_array($field, $model->searchable)) {
@@ -163,8 +165,9 @@ class TNTSearchEngine extends Engine
             $indexer = $this->tnt->createIndex("$indexName.index");
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->disableOutput = true;
+            $indexer->setPrimaryKey($model->getKeyName());
             $fields = implode(', ', $model->searchable);
-            $indexer->query("SELECT {$model->getKeyName()} as id, $fields FROM $indexName WHERE {$model->getKeyName()} = {$model->getKey()}");
+            $indexer->query("SELECT {$model->getKeyName()}, $fields FROM $indexName WHERE {$model->getKeyName()} = {$model->getKey()}");
             $indexer->run();
         }
     }
