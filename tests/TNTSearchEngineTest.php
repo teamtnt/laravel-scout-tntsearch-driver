@@ -45,6 +45,11 @@ class TNTSearchEngineTestModel
         return 1;
     }
 
+    public function getKeyName()
+    {
+        return 'id';
+    }
+
     public function toSearchableArray()
     {
         return ['id' => 1];
