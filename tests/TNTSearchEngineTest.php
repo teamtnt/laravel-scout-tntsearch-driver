@@ -17,6 +17,7 @@ class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
             ->with('table.index')
             ->andReturn($index = Mockery::mock('TeamTNT\TNTSearch\Indexer\TNTIndexer'));
         $index->shouldReceive('setDatabaseHandle');
+        $index->shouldReceive('setPrimaryKey');
         $index->shouldReceive('query');
         $index->shouldReceive('run');
 
