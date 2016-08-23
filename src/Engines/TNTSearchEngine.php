@@ -164,7 +164,7 @@ class TNTSearchEngine extends Engine
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->disableOutput = true;
             $fields = implode(', ', $model->searchable);
-            $indexer->query("SELECT {$model->getKeyName()} as id, $fields FROM $indexName");
+            $indexer->query("SELECT {$model->getKeyName()} as id, $fields FROM $indexName WHERE {$model->getKeyName()} = {$model->getKey()}");
             $indexer->run();
         }
     }

@@ -9,11 +9,11 @@ use TeamTNT\TNTSearch\TNTSearch;
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
     /**
-     * Register the service provider.
+     * Bootstrap any application services.
      *
      * @return void
      */
-    public function register()
+    public function boot()
     {
         $this->app[EngineManager::class]->extend('tntsearch', function () {
             $tnt = new TNTSearch();
