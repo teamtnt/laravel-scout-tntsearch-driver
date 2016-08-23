@@ -16,6 +16,7 @@ class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
         $client->shouldReceive('createIndex')
             ->with('table.index')
             ->andReturn($index = Mockery::mock('TeamTNT\TNTSearch\Indexer\TNTIndexer'));
+        $index->shouldReceive('setDatabaseHandle');
         $index->shouldReceive('query');
         $index->shouldReceive('run');
 
@@ -47,5 +48,12 @@ class TNTSearchEngineTestModel
     public function toSearchableArray()
     {
         return ['id' => 1];
+    }
+
+    public function getConnection()
+    {
+        $connection = Mockery::mock('Illuminate\Database\MySqlConnection');
+        $connection->shouldReceive('getPdo');
+        return $connection;
     }
 }
