@@ -63,8 +63,12 @@ use Laravel\Scout\Searchable;
 class Post extends Model
 {
     use Searchable;
-
-    public $searchable = ['title', 'content'];
+    
+    //fields you want to make searchable
+    public function toSearchableArray()
+    {
+        return ['title', 'content'];
+    }
 }
 ```
 
