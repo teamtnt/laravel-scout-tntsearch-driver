@@ -53,7 +53,7 @@ class TNTSearchEngineTestModel
     public function getConnection()
     {
         $connection = Mockery::mock('Illuminate\Database\MySqlConnection');
-        $connection->shouldReceive('getPdo');
+        $connection->shouldReceive('getPdo')->andReturn(Mockery::mock('PDO'));
 
         return $connection;
     }
