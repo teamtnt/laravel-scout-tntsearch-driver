@@ -161,6 +161,7 @@ class TNTSearchEngine extends Engine
 
         if (!file_exists($this->tnt->config['storage']."/{$indexName}.index")) {
             $indexer = $this->tnt->createIndex("$indexName.index");
+            $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->disableOutput = true;
             $fields = implode(', ', $model->searchable);
             $indexer->query("SELECT id, $fields FROM $indexName");
