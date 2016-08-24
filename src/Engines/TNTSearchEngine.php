@@ -87,9 +87,9 @@ class TNTSearchEngine extends Engine
     public function paginate(Builder $builder, $perPage, $page)
     {
         $builder->limit = 500;
-        $results        = $this->performSearch($builder);
-        $chunks         = array_chunk($results['ids'], $perPage);
-        if(array_key_exists($page - 1, $chunks)) {
+        $results = $this->performSearch($builder);
+        $chunks = array_chunk($results['ids'], $perPage);
+        if (array_key_exists($page - 1, $chunks)) {
             $results['ids'] = $chunks[$page - 1];
         } else {
             $results['ids'] = end($chunks);
