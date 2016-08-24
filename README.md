@@ -67,7 +67,11 @@ class Post extends Model
     //fields you want to make searchable
     public function toSearchableArray()
     {
-        return ['title', 'content'];
+        $array = $this->toArray();
+
+        // Customize array...
+
+        return $array;
     }
 }
 ```

@@ -86,7 +86,16 @@ class TNTSearchEngine extends Engine
      */
     public function paginate(Builder $builder, $perPage, $page)
     {
-        return $this->performSearch($builder);
+        $builder->limit = 500;
+        $results        = $this->performSearch($builder);
+        $chunks         = array_chunk($results['ids'], $perPage);
+        if(array_key_exists($page - 1, $chunks)) {
+            $results['ids'] = $chunks[$page - 1];
+        } else {
+            $results['ids'] = end($chunks);
+        }
+
+        return $results;
     }
 
     /**
@@ -152,7 +161,7 @@ class TNTSearchEngine extends Engine
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->disableOutput = true;
             $indexer->setPrimaryKey($model->getKeyName());
-            $fields = implode(', ', $model->searchable);
+            $fields = implode(', ', array_keys($model->toSearchableArray()));
             $indexer->query("SELECT {$model->getKeyName()}, $fields FROM $indexName WHERE {$model->getKeyName()} = {$model->getKey()}");
             $indexer->run();
         }
