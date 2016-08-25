@@ -89,10 +89,13 @@ class TNTSearchEngine extends Engine
         $builder->limit = 500;
         $results = $this->performSearch($builder);
         $chunks = array_chunk($results['ids'], $perPage);
-        if (array_key_exists($page - 1, $chunks)) {
-            $results['ids'] = $chunks[$page - 1];
-        } else {
-            $results['ids'] = end($chunks);
+
+        if(!empty($chunks)) {
+            if (array_key_exists($page - 1, $chunks)) {
+                $results['ids'] = $chunks[$page - 1];
+            } else {
+                $results['ids'] = end($chunks);
+            }
         }
 
         return $results;
