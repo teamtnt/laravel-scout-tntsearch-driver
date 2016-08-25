@@ -12,9 +12,7 @@ class TNTSearchEngine extends Engine
     /**
      * Create a new engine instance.
      *
-     * @param TeamTNT\TNTSearch\TNTSearch $tnt
-     *
-     * @return void
+     * @param TNTSearch $tnt
      */
     public function __construct(TNTSearch $tnt)
     {
@@ -31,12 +29,14 @@ class TNTSearchEngine extends Engine
     public function update($models)
     {
         $this->initIndex($models->first());
+
         $models->each(function ($model) {
             $searchableFields = $model->toSearchableArray();
 
-            $this->tnt->selectIndex("{$model->searchableAs()}.index");
+            $this->tnt->selectIndex("{$this->getIndexName($model)}.index");
             $index = $this->tnt->getIndex();
             $index->setPrimaryKey($model->getKeyName());
+
             if ($model->getKey()) {
                 $index->update($model->getKey(), $searchableFields);
             } else {
@@ -56,7 +56,7 @@ class TNTSearchEngine extends Engine
     {
         $this->initIndex($models->first());
         $models->each(function ($model) {
-            $this->tnt->selectIndex("{$model->searchableAs()}.index");
+            $this->tnt->selectIndex("{$this->getIndexName($model)}.index");
             $index = $this->tnt->getIndex();
             $index->setPrimaryKey($model->getKeyName());
             $index->delete($model->id);
@@ -108,7 +108,8 @@ class TNTSearchEngine extends Engine
      */
     protected function performSearch(Builder $builder, array $options = [])
     {
-        $index = $builder->index ?: $builder->model->searchableAs();
+        $model = $builder->model;
+        $index = $builder->index ?: $this->getIndexName($model);
         $limit = $builder->limit ?: 10;
         $this->tnt->selectIndex("{$index}.index");
 
@@ -154,7 +155,7 @@ class TNTSearchEngine extends Engine
 
     public function initIndex($model)
     {
-        $indexName = $model->searchableAs();
+        $indexName = $this->getIndexName($model);
 
         if (!file_exists($this->tnt->config['storage']."/{$indexName}.index")) {
             $indexer = $this->tnt->createIndex("$indexName.index");
@@ -165,5 +166,18 @@ class TNTSearchEngine extends Engine
             $indexer->query("SELECT {$model->getKeyName()}, $fields FROM $indexName WHERE {$model->getKeyName()} = {$model->getKey()}");
             $indexer->run();
         }
+    }
+
+    /**
+     * @param $model
+     * @return mixed
+     */
+    private function getIndexName($model)
+    {
+        if (property_exists($model, 'searchable_index')) {
+            return $model->searchable_index;
+        }
+
+        return $model->searchableAs();
     }
 }
