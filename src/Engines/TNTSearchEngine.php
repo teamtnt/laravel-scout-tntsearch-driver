@@ -170,6 +170,7 @@ class TNTSearchEngine extends Engine
 
     /**
      * @param $model
+     *
      * @return mixed
      */
     private function getIndexName($model)
