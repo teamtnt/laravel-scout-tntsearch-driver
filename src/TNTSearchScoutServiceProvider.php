@@ -4,8 +4,8 @@ namespace TeamTNT\Scout;
 
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
-use TeamTNT\TNTSearch\TNTSearch;
 use TeamTNT\Scout\Console\ImportCommand;
+use TeamTNT\TNTSearch\TNTSearch;
 
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
