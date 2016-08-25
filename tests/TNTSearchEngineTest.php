@@ -41,6 +41,11 @@ class TNTSearchEngineTestModel
         return 'table';
     }
 
+    public function getTable()
+    {
+        return 'table';
+    }
+
     public function getKey()
     {
         return 1;
