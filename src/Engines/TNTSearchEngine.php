@@ -147,9 +147,11 @@ class TNTSearchEngine extends Engine
             $model->getKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
-        return collect($results['ids'])->map(function ($hit) use ($models) {
-            return $models[$hit];
-        });
+        if (count($models) !== 0) {
+            return collect($results['ids'])->map(function ($hit) use ($models) {
+                return $models[$hit];
+            });
+        }
     }
 
     public function initIndex($model)
