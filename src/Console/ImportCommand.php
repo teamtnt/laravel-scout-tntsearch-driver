@@ -25,34 +25,35 @@ class ImportCommand extends Command
     /**
      * Execute the console command.
      *
-     * @param  \Illuminate\Contracts\Events\Dispatcher  $events
+     * @param \Illuminate\Contracts\Events\Dispatcher $events
+     *
      * @return void
      */
     public function handle(Dispatcher $events)
     {
         $class = $this->argument('model');
 
-        $model  = new $class;
-        $tnt    = new TNTSearch;
+        $model = new $class();
+        $tnt = new TNTSearch();
         $driver = config('database.default');
         $config = config('scout.tntsearch') + config("database.connections.$driver");
 
         $tnt->loadConfig($config);
         $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
 
-        $indexer = $tnt->createIndex($model->searchableAs() . ".index");
+        $indexer = $tnt->createIndex($model->searchableAs().'.index');
         $indexer->setPrimaryKey($model->getKeyName());
         $fields = implode(', ', array_keys($model->toSearchableArray()));
 
         $query = "{$model->getKeyName()}, $fields";
 
-        if ($fields == "") {
-            $query = "*";
+        if ($fields == '') {
+            $query = '*';
         }
 
         $indexer->query("SELECT $query FROM {$model->getTable()};");
 
         $indexer->run();
-        $this->info('All [' . $class . '] records have been imported.');
+        $this->info('All ['.$class.'] records have been imported.');
     }
 }
