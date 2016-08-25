@@ -5,6 +5,7 @@ namespace TeamTNT\Scout;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
 use TeamTNT\TNTSearch\TNTSearch;
+use TeamTNT\Scout\Console\ImportCommand;
 
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
@@ -25,5 +26,11 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
 
             return new Engines\TNTSearchEngine($tnt);
         });
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ImportCommand::class,
+            ]);
+        }
     }
 }
