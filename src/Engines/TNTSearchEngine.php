@@ -108,7 +108,6 @@ class TNTSearchEngine extends Engine
      * Perform the given search on the engine.
      *
      * @param Builder $builder
-     * @param array   $options
      *
      * @return mixed
      */
