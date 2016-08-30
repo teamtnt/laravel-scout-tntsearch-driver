@@ -10,11 +10,14 @@ use TeamTNT\TNTSearch\TNTSearch;
 class TNTSearchEngine extends Engine
 {
     /**
+     * @var TNTSearch
+     */
+    protected $tnt;
+
+    /**
      * Create a new engine instance.
      *
-     * @param TeamTNT\TNTSearch\TNTSearch $tnt
-     *
-     * @return void
+     * @param TNTSearch $tnt
      */
     public function __construct(TNTSearch $tnt)
     {
@@ -105,11 +108,10 @@ class TNTSearchEngine extends Engine
      * Perform the given search on the engine.
      *
      * @param Builder $builder
-     * @param array   $options
      *
      * @return mixed
      */
-    protected function performSearch(Builder $builder, array $options = [])
+    protected function performSearch(Builder $builder)
     {
         $index = $builder->index ?: $builder->model->searchableAs();
         $limit = $builder->limit ?: 10;
