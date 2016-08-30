@@ -9,7 +9,6 @@ use TeamTNT\TNTSearch\TNTSearch;
 
 class TNTSearchEngine extends Engine
 {
-
     /**
      * @var TNTSearch
      */
