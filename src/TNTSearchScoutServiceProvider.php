@@ -20,6 +20,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
             $tnt = new TNTSearch();
             $driver = config('database.default');
             $config = config('scout.tntsearch') + config("database.connections.$driver");
+            $config['fuzziness'] = env('TNT_FUZZINESS', false);
 
             $tnt->loadConfig($config);
             $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
