@@ -40,6 +40,7 @@ class TNTSearchEngine extends Engine
             $this->tnt->selectIndex("{$model->searchableAs()}.index");
             $index = $this->tnt->getIndex();
             $index->setPrimaryKey($model->getKeyName());
+
             if ($model->getKey()) {
                 $index->update($model->getKey(), $searchableFields);
             } else {
@@ -90,8 +91,8 @@ class TNTSearchEngine extends Engine
     public function paginate(Builder $builder, $perPage, $page)
     {
         $builder->limit = 500;
-        $results = $this->performSearch($builder);
-        $chunks = array_chunk($results['ids'], $perPage);
+        $results        = $this->performSearch($builder);
+        $chunks         = array_chunk($results['ids'], $perPage);
 
         if (!empty($chunks)) {
             if (array_key_exists($page - 1, $chunks)) {
@@ -147,7 +148,8 @@ class TNTSearchEngine extends Engine
         if (count($results['ids']) === 0) {
             return Collection::make();
         }
-        $keys = collect($results['ids']);
+        
+        $keys   = collect($results['ids']);
         $models = $model->whereIn(
             $model->getKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
@@ -155,6 +157,17 @@ class TNTSearchEngine extends Engine
         return collect($results['ids'])->map(function ($hit) use ($models) {
             return $models[$hit];
         });
+    }
+
+    /**
+     * Get the total count from a raw result returned by the engine.
+     *
+     * @param  mixed  $results
+     * @return int
+     */
+    public function getTotalCount($results)
+    {
+        return count($results['ids']);
     }
 
     public function initIndex($model)
