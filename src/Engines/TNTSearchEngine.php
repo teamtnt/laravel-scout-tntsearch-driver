@@ -149,7 +149,7 @@ class TNTSearchEngine extends Engine
             return Collection::make();
         }
 
-        $keys = collect($results['ids']);
+        $keys = collect($results['ids'])->values()->all();
         $models = $model->whereIn(
             $model->getKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
