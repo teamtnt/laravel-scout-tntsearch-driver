@@ -91,8 +91,8 @@ class TNTSearchEngine extends Engine
     public function paginate(Builder $builder, $perPage, $page)
     {
         $builder->limit = 1000;
-        $results        = $this->performSearch($builder);
-        $chunks         = array_chunk($results['ids'], $perPage);
+        $results = $this->performSearch($builder);
+        $chunks = array_chunk($results['ids'], $perPage);
 
         if (!empty($chunks)) {
             if (array_key_exists($page - 1, $chunks)) {
@@ -149,7 +149,7 @@ class TNTSearchEngine extends Engine
             return Collection::make();
         }
 
-        $keys   = collect($results['ids'])->values()->all();
+        $keys = collect($results['ids'])->values()->all();
         $models = $model->whereIn(
             $model->getKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
