@@ -90,9 +90,9 @@ class TNTSearchEngine extends Engine
      */
     public function paginate(Builder $builder, $perPage, $page)
     {
-        $builder->limit = 500;
-        $results = $this->performSearch($builder);
-        $chunks = array_chunk($results['ids'], $perPage);
+        $builder->limit = 1000;
+        $results        = $this->performSearch($builder);
+        $chunks         = array_chunk($results['ids'], $perPage);
 
         if (!empty($chunks)) {
             if (array_key_exists($page - 1, $chunks)) {
@@ -115,7 +115,7 @@ class TNTSearchEngine extends Engine
     protected function performSearch(Builder $builder)
     {
         $index = $builder->index ?: $builder->model->searchableAs();
-        $limit = $builder->limit ?: 10;
+        $limit = $builder->limit ?: 15;
         $this->tnt->selectIndex("{$index}.index");
 
         return $this->tnt->search($builder->query, $limit);
@@ -149,7 +149,7 @@ class TNTSearchEngine extends Engine
             return Collection::make();
         }
 
-        $keys = collect($results['ids'])->values()->all();
+        $keys   = collect($results['ids'])->values()->all();
         $models = $model->whereIn(
             $model->getKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
@@ -168,7 +168,7 @@ class TNTSearchEngine extends Engine
      */
     public function getTotalCount($results)
     {
-        return count($results['ids']);
+        return $results['hits'];
     }
 
     public function initIndex($model)
