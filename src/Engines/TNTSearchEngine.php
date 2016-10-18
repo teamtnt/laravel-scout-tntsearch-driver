@@ -151,7 +151,7 @@ class TNTSearchEngine extends Engine
 
         $keys = collect($results['ids'])->values()->all();
         $models = $model->whereIn(
-            $model->getKeyName(), $keys
+            $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
         return collect($results['ids'])->map(function ($hit) use ($models) {
