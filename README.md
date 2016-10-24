@@ -55,8 +55,7 @@ In your `config/scout.php` add:
 
 After you have installed scout and the TNTSearch driver, you need to add the
 `Searchable` trait to your models that you want to make searchable. Additionaly,
-define the fields you want to make searchable by setting the `searchable` member
-variable.
+define the fields you want to make searchable by defining the `toSearchableArray` method on the model:
 
 ```php
 <?php
@@ -70,7 +69,11 @@ class Post extends Model
 {
     use Searchable;
     
-    //fields you want to make searchable
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
     public function toSearchableArray()
     {
         $array = $this->toArray();
