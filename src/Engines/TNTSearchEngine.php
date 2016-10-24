@@ -34,19 +34,19 @@ class TNTSearchEngine extends Engine
     public function update($models)
     {
         $this->initIndex($models->first());
-        $models->each(function ($model) {
-            $searchableFields = $model->toSearchableArray();
+        $this->tnt->selectIndex("{$models->first()->searchableAs()}.index");
+        $index = $this->tnt->getIndex();
+        $index->setPrimaryKey($models->first()->getKeyName());
 
-            $this->tnt->selectIndex("{$model->searchableAs()}.index");
-            $index = $this->tnt->getIndex();
-            $index->setPrimaryKey($model->getKeyName());
-
+        $index->indexBeginTransaction();
+        $models->each(function ($model) use ($index) {
             if ($model->getKey()) {
-                $index->update($model->getKey(), $searchableFields);
+                $index->update($model->getKey(), $model->toSearchableArray());
             } else {
-                $index->insert($searchableFields);
+                $index->insert($model->toSearchableArray());
             }
         });
+        $index->indexEndTransaction();
     }
 
     /**
