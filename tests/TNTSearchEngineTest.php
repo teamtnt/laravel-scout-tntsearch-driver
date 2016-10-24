@@ -25,7 +25,9 @@ class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
         $client->shouldReceive('getIndex')
             ->andReturn($index);
 
+        $index->shouldReceive('indexBeginTransaction');
         $index->shouldReceive('update');
+        $index->shouldReceive('indexEndTransaction');
 
         $engine = new TNTSearchEngine($client);
         $engine->update(Collection::make([new TNTSearchEngineTestModel()]));
