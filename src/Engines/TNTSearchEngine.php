@@ -185,7 +185,7 @@ class TNTSearchEngine extends Engine
             $indexer->disableOutput = true;
             $indexer->setPrimaryKey($model->getKeyName());
             $fields = implode(', ', array_keys($model->toSearchableArray()));
-            $indexer->query("SELECT {$model->getKeyName()}, $fields FROM {$model->getTable()} WHERE {$model->getKeyName()} = {$model->getKey()}");
+            $indexer->query("SELECT {$model->getKeyName()}, $fields FROM {$model->getTablePrefix()}{$model->getTable()} WHERE {$model->getKeyName()} = {$model->getKey()}");
             $indexer->run();
         }
     }
