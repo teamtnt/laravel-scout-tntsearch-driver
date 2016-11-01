@@ -48,6 +48,11 @@ class TNTSearchEngineTestModel
         return 'table';
     }
 
+    public function getTablePrefix()
+    {
+        return "";
+    }
+
     public function getKey()
     {
         return 1;
