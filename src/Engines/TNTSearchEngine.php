@@ -91,7 +91,7 @@ class TNTSearchEngine extends Engine
     public function paginate(Builder $builder, $perPage, $page)
     {
         $results = $this->performSearch($builder);
-        
+
         if ($builder->limit) {
             $results['hits'] = $builder->limit;
         }
@@ -193,11 +193,7 @@ class TNTSearchEngine extends Engine
         if (!file_exists($this->tnt->config['storage']."/{$indexName}.index")) {
             $indexer = $this->tnt->createIndex("$indexName.index");
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
-            $indexer->disableOutput = true;
             $indexer->setPrimaryKey($model->getKeyName());
-            $fields = implode(', ', array_keys($model->toSearchableArray()));
-            $indexer->query("SELECT {$model->getKeyName()}, $fields FROM {$model->getTablePrefix()}{$model->getTable()} WHERE {$model->getKeyName()} = {$model->getKey()}");
-            $indexer->run();
         }
     }
 }
