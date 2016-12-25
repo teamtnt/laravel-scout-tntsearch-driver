@@ -63,7 +63,7 @@ class TNTSearchEngine extends Engine
             $this->tnt->selectIndex("{$model->searchableAs()}.index");
             $index = $this->tnt->getIndex();
             $index->setPrimaryKey($model->getKeyName());
-            $index->delete($model->id);
+            $index->delete($model->getKey());
         });
     }
 
