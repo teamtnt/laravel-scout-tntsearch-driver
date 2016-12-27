@@ -97,9 +97,15 @@ After that you can search your models with:
 
 `Post::search('Bugs Bunny')->get();`
 
-## Contributing
+##Support [![OpenCollective](https://opencollective.com/tntsearch/backers/badge.svg)](#backers) [![OpenCollective](https://opencollective.com/tntsearch/sponsors/badge.svg)](#sponsors)
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+###Backers
+
+Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/tntsearch#backer)]
+
+## Sponsors
+
+Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/tntsearch#sponsor)]
 
 ## Credits
 
