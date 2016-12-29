@@ -48,6 +48,7 @@ In your `config/scout.php` add:
         'max_expansions' => 50,
         'distance' => 2
     ],
+    'asYouType' => false,
 ],
 ```
 
