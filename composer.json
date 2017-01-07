@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "teamtnt/tntsearch": "0.8.*",
+        "teamtnt/tntsearch": "0.9.*",
         "laravel/scout": "*",
         "illuminate/contracts": "~5.3",
         "illuminate/database": "~5.3",
