@@ -15,6 +15,11 @@ class TNTSearchEngine extends Engine
     protected $tnt;
 
     /**
+     * @var Builder
+     */
+    protected $builder;
+
+    /**
      * Create a new engine instance.
      *
      * @param TNTSearch $tnt
@@ -122,6 +127,8 @@ class TNTSearchEngine extends Engine
         $limit = $builder->limit ?: 10000;
         $this->tnt->selectIndex("{$index}.index");
 
+        $this->builder = $builder;
+
         return $this->tnt->search($builder->query, $limit);
     }
 
@@ -154,14 +161,17 @@ class TNTSearchEngine extends Engine
         }
 
         $keys   = collect($results['ids'])->values()->all();
+        $fieldsWheres = array_keys($this->builder->wheres);
         $models = $model->whereIn(
             $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
         return collect($results['ids'])->map(function ($hit) use ($models) {
             return $models->has($hit) ? $models[$hit] : null;
-        })->filter(function ($model) {
-            return !is_null($model);
+        })->filter(function ($model) use ($fieldsWheres) {
+            return !is_null($model) && array_reduce($fieldsWheres, function ($carry, $item) use($model) {
+                    return $carry && $model[$item] == $this->builder->wheres[$item];
+                }, true);;
         });
     }
 
