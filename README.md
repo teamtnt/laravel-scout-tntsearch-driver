@@ -98,9 +98,14 @@ After that you can search your models with:
 
 `Post::search('Bugs Bunny')->get();`
 
-##Support [![OpenCollective](https://opencollective.com/tntsearch/backers/badge.svg)](#backers) [![OpenCollective](https://opencollective.com/tntsearch/sponsors/badge.svg)](#sponsors)
+## Patreon
 
-###Backers
+- [Nenad Ticaric](https://www.patreon.com/nticaric)
+- [Sasa Tokic](https://www.patreon.com/stokic)
+
+## Support [![OpenCollective](https://opencollective.com/tntsearch/backers/badge.svg)](#backers) [![OpenCollective](https://opencollective.com/tntsearch/sponsors/badge.svg)](#sponsors)
+
+### Backers
 
 Support us with a monthly donation and help us continue our activities. [[Become a backer](https://opencollective.com/tntsearch#backer)]
 
