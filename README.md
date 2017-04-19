@@ -34,6 +34,17 @@ Add the service provider:
     TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
 ],
 ```
+
+Ensure you have Laravel Scout as a provider too otherwise you will get an "unresolvable dependency" error
+
+```php
+// config/app.php
+'providers' => [
+    // ...
+    Laravel\Scout\ScoutServiceProvider::class,
+],
+```
+
 Add  `SCOUT_DRIVER=tntsearch` to your `.env` file
 
 In your `config/scout.php` add:
