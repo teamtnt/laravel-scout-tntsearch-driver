@@ -128,6 +128,7 @@ class TNTSearchEngine extends Engine
         $this->tnt->selectIndex("{$index}.index");
 
         $this->builder = $builder;
+        $this->tnt->asYouType = $builder->model->asYouType ?: false;
 
         return $this->tnt->search($builder->query, $limit);
     }

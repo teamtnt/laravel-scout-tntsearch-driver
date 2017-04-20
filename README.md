@@ -63,6 +63,8 @@ In your `config/scout.php` add:
 ],
 ```
 
+The `asYouType` option can be set per model basis, see example bellow
+
 ## Usage
 
 After you have installed scout and the TNTSearch driver, you need to add the
@@ -80,6 +82,8 @@ use Laravel\Scout\Searchable;
 class Post extends Model
 {
     use Searchable;
+
+    public $asYouType = true;
     
     /**
      * Get the indexable data array for the model.
