@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\TNTSearch;
+use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
 
 class TNTSearchEngine extends Engine
 {
@@ -81,7 +82,11 @@ class TNTSearchEngine extends Engine
      */
     public function search(Builder $builder)
     {
-        return $this->performSearch($builder);
+        try {
+            return $this->performSearch($builder);
+        } catch (IndexNotFoundException $e) {
+            $this->initIndex($builder->model);
+        }
     }
 
     /**
