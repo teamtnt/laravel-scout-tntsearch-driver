@@ -47,6 +47,12 @@ Ensure you have Laravel Scout as a provider too otherwise you will get an "unres
 
 Add  `SCOUT_DRIVER=tntsearch` to your `.env` file
 
+Then you should publish `scout.php` configuration file to your config directory
+
+```bash
+php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"
+```
+
 In your `config/scout.php` add:
 
 ```php
