@@ -126,7 +126,7 @@ class TNTSearchEngine extends Engine
      *
      * @return mixed
      */
-    protected function performSearch(Builder $builder)
+    protected function performSearch(Builder $builder, array $options = [])
     {
         $index = $builder->index ?: $builder->model->searchableAs();
         $limit = $builder->limit ?: 10000;
@@ -134,6 +134,15 @@ class TNTSearchEngine extends Engine
 
         $this->builder = $builder;
         $this->tnt->asYouType = $builder->model->asYouType ?: false;
+
+        if ($builder->callback) {
+            return call_user_func(
+                $builder->callback,
+                $this->tnt,
+                $builder->query,
+                $options
+            );
+        }
 
         return $this->tnt->search($builder->query, $limit);
     }

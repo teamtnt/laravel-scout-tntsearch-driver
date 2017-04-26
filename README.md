@@ -1,4 +1,4 @@
-# TNTSearch Driver for Laravel Scout - Laravel 5.3
+# TNTSearch Driver for Laravel Scout - Laravel 5.3/5.4
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/teamtnt/laravel-scout-tntsearch-driver.svg?style=flat-square)](https://packagist.org/packages/teamtnt/laravel-scout-tntsearch-driver)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
@@ -6,7 +6,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/teamtnt/laravel-scout-tntsearch-driver.svg?style=flat-square)](https://scrutinizer-ci.com/g/teamtnt/laravel-scout-tntsearch-driver)
 [![Total Downloads](https://img.shields.io/packagist/dt/teamtnt/laravel-scout-tntsearch-driver.svg?style=flat-square)](https://packagist.org/packages/teamtnt/laravel-scout-tntsearch-driver)
 
-This package makes it easy to add full text search support to your models with Laravel 5.3.
+This package makes it easy to add full text search support to your models with Laravel 5.3/5.4.
 
 ## Contents
 
