@@ -37,7 +37,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
         }
     }
 
-    private function setFuzziness($tnt)
+    protected function setFuzziness($tnt)
     {
         $fuzziness = config('scout.tntsearch.fuzziness');
         $prefix_length = config('scout.tntsearch.fuzzy.prefix_length');
@@ -51,7 +51,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
         $tnt->fuzzy_distance = isset($distance) ? $distance : $tnt->fuzzy_distance;
     }
 
-    private function setAsYouType($tnt)
+    protected function setAsYouType($tnt)
     {
         $asYouType = config('scout.tntsearch.asYouType');
 
