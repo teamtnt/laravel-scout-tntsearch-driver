@@ -71,6 +71,7 @@ In your `config/scout.php` add:
         'distance' => 2
     ],
     'asYouType' => false,
+    'searchBoolean' => env('TNTSEARCH_BOOLEAN', false),
 ],
 ```
 
