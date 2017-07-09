@@ -143,8 +143,11 @@ class TNTSearchEngine extends Engine
                 $options
             );
         }
-
-        return $this->tnt->search($builder->query, $limit);
+        if ($this->tnt->config['searchBoolean']) {
+            return $this->tnt->searchBoolean($builder->query, $limit);
+        } else {
+            return $this->tnt->search($builder->query, $limit);
+        }
     }
 
     /**
