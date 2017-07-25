@@ -1,10 +1,10 @@
 <?php namespace TeamTNT\Scout;
 
-use Engines\TNTSearchEngine;
 use TeamTNT\TNTSearch\TNTSearch;
 use Laravel\Scout\EngineManager;
 use Illuminate\Support\ServiceProvider;
 use TeamTNT\Scout\Console\ImportCommand;
+use TeamTNT\Scout\Engines\TNTSearchEngine;
 
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
