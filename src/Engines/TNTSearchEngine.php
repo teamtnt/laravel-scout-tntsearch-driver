@@ -143,7 +143,7 @@ class TNTSearchEngine extends Engine
                 $options
             );
         }
-        if ($this->tnt->config['searchBoolean']) {
+        if (isset($this->tnt->config['searchBoolean']) ? $this->tnt->config['searchBoolean'] : false) {
             return $this->tnt->searchBoolean($builder->query, $limit);
         } else {
             return $this->tnt->search($builder->query, $limit);
