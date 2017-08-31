@@ -46,10 +46,16 @@ class TNTSearchEngine extends Engine
 
         $index->indexBeginTransaction();
         $models->each(function ($model) use ($index) {
+            $array = $model->toSearchableArray();
+
+            if (empty($array)) {
+                return;
+            }
+
             if ($model->getKey()) {
-                $index->update($model->getKey(), $model->toSearchableArray());
+                $index->update($model->getKey(), $array);
             } else {
-                $index->insert($model->toSearchableArray());
+                $index->insert($array);
             }
         });
         $index->indexEndTransaction();
