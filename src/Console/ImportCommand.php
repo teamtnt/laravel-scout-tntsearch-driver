@@ -34,12 +34,12 @@ class ImportCommand extends Command
         $class = $this->argument('model');
 
         $model = new $class();
-        $tnt = new TNTSearch();
-        $driver = config('database.default');
+        $tnt = new TNTSearch();        
+        $driver = $model->getConnectionName() ?: config('database.default');
         $config = config('scout.tntsearch') + config("database.connections.$driver");
 
         $tnt->loadConfig($config);
-        $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
+        $tnt->setDatabaseHandle(app('db')->connection($driver)->getPdo());
 
         $indexer = $tnt->createIndex($model->searchableAs().'.index');
         $indexer->setPrimaryKey($model->getKeyName());
