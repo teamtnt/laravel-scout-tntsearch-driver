@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": ">=5.6.4",
-        "teamtnt/tntsearch": "1.0.*",
+        "teamtnt/tntsearch": "1.2.*",
         "laravel/scout": "*",
         "illuminate/bus": "~5.4",
         "illuminate/contracts": "~5.4",
