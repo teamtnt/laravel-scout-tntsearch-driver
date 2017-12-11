@@ -138,7 +138,7 @@ Become a sponsor and get your logo on our README on Github with a link to your s
 ## Contributors
 
 This project exists thanks to all the people who contribute.
-<a href="graphs/contributors"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/contributors.svg?width=890" /></a>
+<a href="../../graphs/contributors"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/contributors.svg?width=890" /></a>
 
 
 ## Backers
