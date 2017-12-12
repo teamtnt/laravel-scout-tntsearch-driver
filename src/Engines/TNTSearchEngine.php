@@ -10,6 +10,8 @@ use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
 
 class TNTSearchEngine extends Engine
 {
+    const NO_RESULTS_COUNT = 0;
+
     /**
      * @var TNTSearch
      */
@@ -19,6 +21,8 @@ class TNTSearchEngine extends Engine
      * @var Builder
      */
     protected $builder;
+
+    protected $modelCollection;
 
     /**
      * Create a new engine instance.
@@ -184,19 +188,7 @@ class TNTSearchEngine extends Engine
             return Collection::make();
         }
 
-        $keys   = collect($results['ids'])->values()->all();
-        $fieldsWheres = array_keys($this->builder->wheres);
-        $models = $model->whereIn(
-            $model->getQualifiedKeyName(), $keys
-        )->get()->keyBy($model->getKeyName());
-
-        return collect($results['ids'])->map(function ($hit) use ($models) {
-            return $models->has($hit) ? $models[$hit] : null;
-        })->filter(function ($model) use ($fieldsWheres) {
-            return !is_null($model) && array_reduce($fieldsWheres, function ($carry, $item) use($model) {
-                    return $carry && $model[$item] == $this->builder->wheres[$item];
-                }, true);;
-        });
+        return $this->modelCollection($results);
     }
 
     /**
@@ -219,7 +211,11 @@ class TNTSearchEngine extends Engine
      */
     public function getTotalCount($results)
     {
-        return $results['hits'];
+        if (count($results['ids']) === 0) {
+            return self::NO_RESULTS_COUNT;
+        }
+
+        return $this->modelCollection($results)->count();
     }
 
     public function initIndex($model)
@@ -231,5 +227,28 @@ class TNTSearchEngine extends Engine
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->setPrimaryKey($model->getKeyName());
         }
+    }
+
+    protected function modelCollection($results)
+    {
+        if (! is_null($this->modelCollection)) {
+            return $this->modelCollection;
+        }
+
+        $keys   = collect($results['ids'])->values()->all();
+        $fieldsWheres = array_keys($this->builder->wheres);
+        $models = $this->builder->model->whereIn(
+            $this->builder->model->getQualifiedKeyName(), $keys
+        )->get()->keyBy($this->builder->model->getKeyName());
+
+        $this->modelCollection = collect($results['ids'])->map(function ($hit) use ($models) {
+            return $models->has($hit) ? $models[$hit] : null;
+        })->filter(function ($model) use ($fieldsWheres) {
+            return !is_null($model) && array_reduce($fieldsWheres, function ($carry, $item) use($model) {
+                    return $carry && $model[$item] == $this->builder->wheres[$item];
+                }, true);
+        });
+
+        return $this->modelCollection;
     }
 }
