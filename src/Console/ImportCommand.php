@@ -43,7 +43,11 @@ class ImportCommand extends Command
 
         $indexer = $tnt->createIndex($model->searchableAs().'.index');
         $indexer->setPrimaryKey($model->getKeyName());
-        $fields = implode(', ', array_keys($model->toSearchableArray()));
+
+        $availableColumns = \Schema::getColumnListing($model->getTable());
+        $desiredColumns = array_keys($model->toSearchableArray());
+
+        $fields = implode(', ', array_intersect($desiredColumns, $availableColumns));
 
         $query = "{$model->getKeyName()}, $fields";
 
