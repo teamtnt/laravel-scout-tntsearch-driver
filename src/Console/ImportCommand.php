@@ -34,7 +34,7 @@ class ImportCommand extends Command
         $class = $this->argument('model');
 
         $model = new $class();
-        $tnt = new TNTSearch();        
+        $tnt = new TNTSearch();
         $driver = $model->getConnectionName() ?: config('database.default');
         $config = config('scout.tntsearch') + config("database.connections.$driver");
 
@@ -42,22 +42,15 @@ class ImportCommand extends Command
         $tnt->setDatabaseHandle(app('db')->connection($driver)->getPdo());
 
         $indexer = $tnt->createIndex($model->searchableAs().'.index');
-        $indexer->setPrimaryKey($model->getKeyName());
 
-        $availableColumns = \Schema::getColumnListing($model->getTable());
-        $desiredColumns = array_keys($model->toSearchableArray());
+        $model::all()->each(function($searchableItem) use ($indexer) {
+            $stems = collect($searchableItem->toSearchableArray())
+                ->map(function ($columnContent) use ($indexer) {
+                    return $indexer->stemText($columnContent);
+                });
+            $indexer->saveToIndex($stems, $searchableItem->{$searchableItem->getKeyName()});
+        });
 
-        $fields = implode(', ', array_intersect($desiredColumns, $availableColumns));
-
-        $query = "{$model->getKeyName()}, $fields";
-
-        if ($fields == '') {
-            $query = '*';
-        }
-
-        $indexer->query("SELECT $query FROM {$model->getTable()};");
-
-        $indexer->run();
         $this->info('All ['.$class.'] records have been imported.');
     }
 }
