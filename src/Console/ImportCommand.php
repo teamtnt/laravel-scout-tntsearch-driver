@@ -51,6 +51,8 @@ class ImportCommand extends Command
             $indexer->saveToIndex($stems, $searchableItem->{$searchableItem->getKeyName()});
         });
 
+        $indexer->updateInfoTable('total_documents', $model::count());
+
         $this->info('All ['.$class.'] records have been imported.');
     }
 }
