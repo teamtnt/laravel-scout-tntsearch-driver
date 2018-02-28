@@ -195,7 +195,7 @@ class TNTSearchEngine extends Engine
         })->filter(function ($model) use ($fieldsWheres) {
             return !is_null($model) && array_reduce($fieldsWheres, function ($carry, $item) use($model) {
                     return $carry && $model[$item] == $this->builder->wheres[$item];
-                }, true);;
+                }, true);
         });
     }
 
