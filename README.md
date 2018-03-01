@@ -74,8 +74,12 @@ In your `config/scout.php` add:
     'searchBoolean' => env('TNTSEARCH_BOOLEAN', false),
 ],
 ```
+To prevent your search indexes being commited to your project repository,
+add the following line to your `.gitignore` file.
 
-The `asYouType` option can be set per model basis, see example bellow
+```/storage/*.index```
+
+The `asYouType` option can be set per model basis, see the example below.
 
 ## Usage
 
