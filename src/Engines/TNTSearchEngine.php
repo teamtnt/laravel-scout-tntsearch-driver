@@ -139,7 +139,10 @@ class TNTSearchEngine extends Engine
         $this->tnt->selectIndex("{$index}.index");
 
         $this->builder = $builder;
-        $this->tnt->asYouType = $builder->model->asYouType ?: false;
+
+        if (isset($builder->model->asYouType)) {
+            $this->tnt->asYouType = $builder->model->asYouType;
+        }
 
         if ($builder->callback) {
             return call_user_func(
