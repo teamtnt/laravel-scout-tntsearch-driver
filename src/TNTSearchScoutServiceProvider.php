@@ -2,6 +2,7 @@
 
 use TeamTNT\TNTSearch\TNTSearch;
 use Laravel\Scout\EngineManager;
+use Laravel\Scout\Builder;
 use Illuminate\Support\ServiceProvider;
 use TeamTNT\Scout\Console\ImportCommand;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
@@ -35,6 +36,11 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
                 ImportCommand::class,
             ]);
         }
+
+        Builder::macro('constrain', function($constraints) {
+            $this->constraints = $constraints;
+            return $this;
+        });
     }
 
     protected function setFuzziness($tnt)
