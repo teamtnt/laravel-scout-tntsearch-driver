@@ -112,13 +112,39 @@ class TNTSearchEngine extends Engine
             $results['hits'] = $builder->limit;
         }
 
-        $maxResultSet = $this->getBuilder($builder->model)->whereIn(
-            $builder->model->getQualifiedKeyName(), $results['ids']
-        )->pluck($builder->model->getKeyName());
+        $searchResults = $results['ids'];
 
-        $filtered = collect($results['ids'])->filter(function($hit) use($maxResultSet) {
-            return $maxResultSet->contains($hit);
-        });
+        $qualifiedKeyName = $builder->model->getQualifiedKeyName();  // tableName.id
+        $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
+    
+        $sub = $this->getBuilder($builder->model)->whereIn(
+            $qualifiedKeyName, $searchResults
+        ); // sub query for left join
+
+        /*
+         * The search index results ($results['ids']) need to be compared against our query
+         * that contains the constraints.
+         * 
+         * To get the correct results and counts for the pagination, we remove those ids
+         * from the search index results that were found by the search but are not part of
+         * the query ($sub) that is constrained.
+         * 
+         * This is achieved with self joining the constrained query as subquery and selecting
+         * the ids which are not matching to anything (i.e., is null).
+         * 
+         * The constraints usually remove only a small amount of results, which is why the non
+         * matching results are looked up and removed, instead of returning a collection with
+         * all the valid results.
+         */
+        $discardIds = $builder->model->newQuery()
+            ->select($qualifiedKeyName)
+            ->leftJoinSub($sub->getQuery(), 'sub', $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->whereIn($qualifiedKeyName, $searchResults)
+            ->whereNull($subQualifiedKeyName)
+            ->pluck('id');
+
+        // returns values of $results['ids'] that are not part of $discardIds
+        $filtered = collect($results['ids'])->diff($discardIds);
 
         $results['hits'] = $filtered->count();
 
