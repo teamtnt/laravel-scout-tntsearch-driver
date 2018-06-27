@@ -30,6 +30,11 @@ You can install the package via composer:
 composer require teamtnt/laravel-scout-tntsearch-driver
 ```
 
+This package requires the dependency of:
+``` bash
+composer require teamtnt/tntsearch
+```
+
 Add the service provider:
 
 ```php
