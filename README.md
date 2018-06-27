@@ -129,7 +129,7 @@ After that you can search your models with:
 
 `Post::search('Bugs Bunny')->get();`
 
-## Constrains
+## Constraints
 
 Additionally to `where()` statements as conditions, you're able to use Eloquent queries to constrain your search. This allows you to take relationships into account.
 
