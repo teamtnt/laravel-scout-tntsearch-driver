@@ -129,6 +129,61 @@ After that you can search your models with:
 
 `Post::search('Bugs Bunny')->get();`
 
+## Constraints
+
+Additionally to `where()` statements as conditions, you're able to use Eloquent queries to constrain your search. This allows you to take relationships into account.
+
+If you make use of this, the search command has to be called after all queries have been defined in your controller.
+
+The `where()` statements you already know can be applied everywhere.
+
+```php
+namespace App\Http\Controllers;
+
+use App\Post;
+
+class PostController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $post = new Post;
+
+        // filter out posts to which the given topic is assigned
+        if($request->topic) {
+            $post = $post->whereNotIn('id', function($query){
+                $query->select('assigned_to')->from('comments')->where('topic','=', request()->input('topic'));
+            });
+        }
+
+        // only posts from people that are no moderators
+        $post = $post->byRole('moderator','!=');
+
+        // when user is not admin filter out internal posts
+        if(!auth()->user()->hasRole('admin'))
+        {
+            $post= $post->where('internal_post', false);
+        }
+
+        if ($request->searchTerm) {
+            $constraints = $post; // not necessary but for better readability
+            $post = Department::search($request->searchTerm)->constrain($constraints);
+        }
+
+        $post->where('deleted', false);
+
+        $paginator = $department->paginate(10);
+        $posts = $paginator->getCollection();
+
+        // return posts
+    }
+}
+```
+
 ## Sponsors
 
 Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/tntsearch#sponsor)]
