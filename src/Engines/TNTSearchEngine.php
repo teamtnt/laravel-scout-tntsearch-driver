@@ -141,7 +141,7 @@ class TNTSearchEngine extends Engine
             ->leftJoinSub($sub->getQuery(), 'sub', $subQualifiedKeyName, '=', $qualifiedKeyName)
             ->whereIn($qualifiedKeyName, $searchResults)
             ->whereNull($subQualifiedKeyName)
-            ->pluck('id');
+            ->pluck($builder->model->getKeyName());
 
         // returns values of $results['ids'] that are not part of $discardIds
         $filtered = collect($results['ids'])->diff($discardIds);
