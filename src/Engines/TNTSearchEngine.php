@@ -251,7 +251,7 @@ class TNTSearchEngine extends Engine
     public function getBuilder($model)
     {
         // get query as given constraint or create a new query
-        $builder = $this->builder->constraints ?? $model->newQuery();
+        $builder = isset($this->builder->constraints) ? $this->builder->constraints : $model->newQuery();
 
         // iterate over given where clauses
         return collect($this->builder->wheres)->map(function ($value, $key) {
