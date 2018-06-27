@@ -112,16 +112,54 @@ class TNTSearchEngine extends Engine
             $results['hits'] = $builder->limit;
         }
 
-        $chunks = array_chunk($results['ids'], $perPage);
+        $searchResults = $results['ids'];
 
-        if (!empty($chunks)) {
-            if (array_key_exists($page - 1, $chunks)) {
-                $results['ids'] = $chunks[$page - 1];
-            } else {
-                $results['ids'] = end($chunks);
-            }
+        $qualifiedKeyName = $builder->model->getQualifiedKeyName();  // tableName.id
+        $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
+    
+        $sub = $this->getBuilder($builder->model)->whereIn(
+            $qualifiedKeyName, $searchResults
+        ); // sub query for left join
+
+        /*
+         * The search index results ($results['ids']) need to be compared against our query
+         * that contains the constraints.
+         * 
+         * To get the correct results and counts for the pagination, we remove those ids
+         * from the search index results that were found by the search but are not part of
+         * the query ($sub) that is constrained.
+         * 
+         * This is achieved with self joining the constrained query as subquery and selecting
+         * the ids which are not matching to anything (i.e., is null).
+         * 
+         * The constraints usually remove only a small amount of results, which is why the non
+         * matching results are looked up and removed, instead of returning a collection with
+         * all the valid results.
+         */
+        $discardIds = $builder->model->newQuery()
+            ->select($qualifiedKeyName)
+            ->leftJoinSub($sub->getQuery(), 'sub', $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->whereIn($qualifiedKeyName, $searchResults)
+            ->whereNull($subQualifiedKeyName)
+            ->pluck($builder->model->getKeyName());
+
+        // returns values of $results['ids'] that are not part of $discardIds
+        $filtered = collect($results['ids'])->diff($discardIds);
+
+        $results['hits'] = $filtered->count();
+
+        $chunks = array_chunk($filtered->toArray(), $perPage);
+        
+        if (empty($chunks)) {
+            return $results;
         }
 
+        if (array_key_exists($page - 1, $chunks)) {
+            $results['ids'] = $chunks[$page - 1];
+        } else {
+            $results['ids'] = end($chunks);
+        }
+        
         return $results;
     }
 
@@ -184,19 +222,43 @@ class TNTSearchEngine extends Engine
             return Collection::make();
         }
 
-        $keys   = collect($results['ids'])->values()->all();
-        $fieldsWheres = array_keys($this->builder->wheres);
-        $models = $model->whereIn(
+        $keys = collect($results['ids'])->values()->all();
+
+        $builder = $this->getBuilder($model);
+
+        $models = $builder->whereIn(
             $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
         return collect($results['ids'])->map(function ($hit) use ($models) {
-            return $models->has($hit) ? $models[$hit] : null;
-        })->filter(function ($model) use ($fieldsWheres) {
-            return !is_null($model) && array_reduce($fieldsWheres, function ($carry, $item) use($model) {
-                    return $carry && $model[$item] == $this->builder->wheres[$item];
-                }, true);
-        });
+            if (isset($models[$hit])) {
+                return $models[$hit];
+            }
+        })->filter()->values();
+    }
+
+    /**
+     * Return query builder either from given constraints, or as
+     * new query. Add where statements to builder when given.
+     *
+     * @param \Illuminate\Database\Eloquent\Model $model
+     *
+     * @return Builder
+     */
+    public function getBuilder($model)
+    {
+        // get query as given constraint or create a new query
+        $builder = $this->builder->constraints ?? $model->newQuery();
+
+        // iterate over given where clauses
+        return collect($this->builder->wheres)->map(function ($value, $key) {
+            // for reduce function combine key and value into array
+            return [$key, $value];
+        })->reduce(function ($builder, $where) {
+            // separate key, value again
+            list($key, $value) = $where;
+            return $builder->where($key, $value);
+        }, $builder);
     }
 
     /**
