@@ -8,10 +8,9 @@
 
 This package makes it easy to add full text search support to your models with Laravel 5.3/5.4/5.5/5.6.
 
-## Support us on Patreon
+## Support us on Open Collective
 
-- [Nenad Ticaric](https://www.patreon.com/nticaric)
-- [Sasa Tokic](https://www.patreon.com/stokic)
+- [TNTSearch](https://opencollective.com/tntsearch)
 
 ## Contents
 
