@@ -139,8 +139,7 @@ class TNTSearchEngine extends Engine
          */
         $discardIds = $builder->model->newQuery()
             ->select($qualifiedKeyName)
-            ->leftJoin(DB::raw('(' . $sub->getQuery()->toSql() .') as sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
-            ->addBinding($sub->getQuery()->getBindings(), 'join')
+            ->leftJoinSub($sub->getQuery(), 'sub', $subQualifiedKeyName, '=', $qualifiedKeyName)
             ->whereIn($qualifiedKeyName, $searchResults)
             ->whereNull($subQualifiedKeyName)
             ->pluck($builder->model->getKeyName());
@@ -235,10 +234,13 @@ class TNTSearchEngine extends Engine
             $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
-        // use ordered indices when orderBy is used in search
-        $resultCollection = empty($this->builder->orders) ? collect($results['ids']) : collect($models->keys()->toArray());
+        // sort models by user choice
+        if (!empty($this->builder->orders)) {
+            return $models->values();
+        }
 
-        return $resultCollection->map(function ($hit) use ($models) {
+        // sort models by tnt search result set
+        return collect($results['ids'])->map(function ($hit) use ($models) {
             if (isset($models[$hit])) {
                 return $models[$hit];
             }
