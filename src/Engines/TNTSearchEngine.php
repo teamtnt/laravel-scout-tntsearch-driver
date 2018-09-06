@@ -3,6 +3,7 @@
 namespace TeamTNT\Scout\Engines;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\TNTSearch;
@@ -138,7 +139,7 @@ class TNTSearchEngine extends Engine
          */
         $discardIds = $builder->model->newQuery()
             ->select($qualifiedKeyName)
-            ->leftJoinSub($sub->getQuery(), 'sub', $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->leftJoin(DB::raw('(' . $sub->getQuery()->toSql() .') as sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
             ->whereIn($qualifiedKeyName, $searchResults)
             ->whereNull($subQualifiedKeyName)
             ->pluck($builder->model->getKeyName());
