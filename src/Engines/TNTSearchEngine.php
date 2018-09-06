@@ -233,6 +233,12 @@ class TNTSearchEngine extends Engine
             $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
+        // sort models by user choice
+        if (!empty($this->builder->orders)) {
+            return $models->values();
+        }
+
+        // sort models by tnt search result set
         return collect($results['ids'])->map(function ($hit) use ($models) {
             if (isset($models[$hit])) {
                 return $models[$hit];
@@ -254,13 +260,23 @@ class TNTSearchEngine extends Engine
         $builder = isset($this->builder->constraints) ? $this->builder->constraints : $model->newQuery();
 
         // iterate over given where clauses
-        return collect($this->builder->wheres)->map(function ($value, $key) {
+        $builder = collect($this->builder->wheres)->map(function ($value, $key) {
             // for reduce function combine key and value into array
             return [$key, $value];
         })->reduce(function ($builder, $where) {
             // separate key, value again
             list($key, $value) = $where;
             return $builder->where($key, $value);
+        }, $builder);
+
+        //iterate over given orderBy clauses - should be only one
+        return collect($this->builder->orders)->map(function ($value, $key) {
+            // for reduce function combine key and value into array
+            return [$value["column"], $value["direction"]];
+        })->reduce(function ($builder, $orderBy) {
+            // separate key, value again
+            list($column, $direction) = $orderBy;
+            return $builder->orderBy($column, $direction);
         }, $builder);
     }
 
