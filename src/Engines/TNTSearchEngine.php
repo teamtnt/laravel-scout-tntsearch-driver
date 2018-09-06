@@ -230,6 +230,10 @@ class TNTSearchEngine extends Engine
         $keys = collect($results['ids'])->values()->all();
 
         $builder = $this->getBuilder($model);
+        
+        if($this->builder->queryCallback){
+            call_user_func($this->builder->queryCallback, $builder);
+        }
 
         $models = $builder->whereIn(
             $model->getQualifiedKeyName(), $keys
