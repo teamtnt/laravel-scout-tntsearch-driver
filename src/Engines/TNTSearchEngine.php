@@ -3,7 +3,6 @@
 namespace TeamTNT\Scout\Engines;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\TNTSearch;
