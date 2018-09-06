@@ -175,6 +175,8 @@ class PostController extends Controller
 
         $post->where('deleted', false);
 
+        $post->orderBy('updated_at', 'asc');
+
         $paginator = $department->paginate(10);
         $posts = $paginator->getCollection();
 
@@ -182,6 +184,11 @@ class PostController extends Controller
     }
 }
 ```
+
+## OrderBy
+An `orderBy()` statement can now be applied to the search query similar to the `where()` statement.
+
+When using constraints apply it after the constraints are added to the query, as seen in the above example.
 
 ## Sponsors
 
