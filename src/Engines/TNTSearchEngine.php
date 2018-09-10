@@ -2,11 +2,12 @@
 
 namespace TeamTNT\Scout\Engines;
 
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder;
-use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\TNTSearch;
+use Laravel\Scout\Engines\Engine;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
 
 class TNTSearchEngine extends Engine
@@ -20,6 +21,13 @@ class TNTSearchEngine extends Engine
      * @var Builder
      */
     protected $builder;
+
+    /**
+     * Used to query database with given constraints
+     * 
+     * @var Builder
+     */
+    protected $query;
 
     /**
      * Create a new engine instance.
@@ -117,22 +125,26 @@ class TNTSearchEngine extends Engine
 
         $qualifiedKeyName = $builder->model->getQualifiedKeyName();  // tableName.id
         $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
-    
-        $sub = $this->getBuilder($builder->model)->whereIn(
+
+        if (!isset($this->query)) {
+            $this->query = $this->getBuilder($builder->model);
+        }
+
+        $sub = $this->query->whereIn(
             $qualifiedKeyName, $searchResults
         ); // sub query for left join
 
         /*
          * The search index results ($results['ids']) need to be compared against our query
          * that contains the constraints.
-         * 
+         *
          * To get the correct results and counts for the pagination, we remove those ids
          * from the search index results that were found by the search but are not part of
          * the query ($sub) that is constrained.
-         * 
+         *
          * This is achieved with self joining the constrained query as subquery and selecting
          * the ids which are not matching to anything (i.e., is null).
-         * 
+         *
          * The constraints usually remove only a small amount of results, which is why the non
          * matching results are looked up and removed, instead of returning a collection with
          * all the valid results.
@@ -151,7 +163,7 @@ class TNTSearchEngine extends Engine
         $results['hits'] = $filtered->count();
 
         $chunks = array_chunk($filtered->toArray(), $perPage);
-        
+
         if (empty($chunks)) {
             return $results;
         }
@@ -161,7 +173,7 @@ class TNTSearchEngine extends Engine
         } else {
             $results['ids'] = end($chunks);
         }
-        
+
         return $results;
     }
 
@@ -229,9 +241,15 @@ class TNTSearchEngine extends Engine
 
         $keys = collect($results['ids'])->values()->all();
 
-        $builder = $this->getBuilder($model);
+        if($this->builder->queryCallback){
+            call_user_func($this->builder->queryCallback, $builder);
+        }
 
-        $models = $builder->whereIn(
+        if (!isset($this->query)) {
+            $this->query = $this->getBuilder($builder->model);
+        }
+
+        $models = $this->query->whereIn(
             $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
@@ -260,6 +278,8 @@ class TNTSearchEngine extends Engine
     {
         // get query as given constraint or create a new query
         $builder = isset($this->builder->constraints) ? $this->builder->constraints : $model->newQuery();
+
+        $builder = $this->handleSoftDeletes($builder, $model);
 
         // iterate over given where clauses
         $builder = collect($this->builder->wheres)->map(function ($value, $key) {
@@ -314,5 +334,50 @@ class TNTSearchEngine extends Engine
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->setPrimaryKey($model->getKeyName());
         }
+    }
+
+    /**
+     * Determine if the given model uses soft deletes.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @return bool
+     */
+    protected function usesSoftDelete($model)
+    {
+        return in_array(SoftDeletes::class, class_uses_recursive($model));
+    }
+
+    /**
+     *
+     */
+    private function handleSoftDeletes($builder, $model)
+    {
+        // remove where statement for __soft_deleted when soft delete is not active
+        if (!$this->usesSoftDelete($model) || !config('scout.soft_delete', true)) {
+            unset($this->builder->wheres['__soft_deleted']);
+            return $builder;
+        }
+
+        /**
+         * Use standard behaviour of Laravel Scout builder class to support soft deletes.
+         *
+         * When no __soft_deleted statement is given return all entries
+         */
+        if (!in_array('__soft_deleted', $this->builder->wheres)) {
+            return $builder->withTrashed();
+        }
+
+        /**
+         * When __soft_deleted is 1 then return only soft deleted entries
+         */
+        if ($this->builder->wheres['__soft_deleted']) {
+            $builder = $builder->onlyTrashed();
+        }
+
+        /**
+         * Returns all undeleted entries, default behaviour
+         */
+        unset($this->builder->wheres['__soft_deleted']);
+        return $builder;
     }
 }
