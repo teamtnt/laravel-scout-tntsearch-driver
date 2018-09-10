@@ -331,6 +331,8 @@ class TNTSearchEngine extends Engine
     private function handleSoftDeletes($builder, $model)
     {
         // remove where statement for __soft_deleted when soft delete is not active
+        // does not show soft deleted items when trait is attached to model and
+        // config('scout.soft_delete') is false
         if (!$this->usesSoftDelete($model) || !config('scout.soft_delete', true)) {
             unset($this->builder->wheres['__soft_deleted']);
             return $builder;
