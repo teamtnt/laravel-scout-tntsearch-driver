@@ -2,11 +2,12 @@
 
 namespace TeamTNT\Scout\Engines;
 
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder;
-use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\TNTSearch;
+use Laravel\Scout\Engines\Engine;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
 
 class TNTSearchEngine extends Engine
@@ -20,6 +21,13 @@ class TNTSearchEngine extends Engine
      * @var Builder
      */
     protected $builder;
+
+    /**
+     * Used to query database with given constraints.
+     *
+     * @var Builder
+     */
+    protected $query;
 
     /**
      * Create a new engine instance.
@@ -113,45 +121,12 @@ class TNTSearchEngine extends Engine
             $results['hits'] = $builder->limit;
         }
 
-        $searchResults = $results['ids'];
-
-        $qualifiedKeyName = $builder->model->getQualifiedKeyName();  // tableName.id
-        $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
-    
-        $sub = $this->getBuilder($builder->model)->whereIn(
-            $qualifiedKeyName, $searchResults
-        ); // sub query for left join
-
-        /*
-         * The search index results ($results['ids']) need to be compared against our query
-         * that contains the constraints.
-         * 
-         * To get the correct results and counts for the pagination, we remove those ids
-         * from the search index results that were found by the search but are not part of
-         * the query ($sub) that is constrained.
-         * 
-         * This is achieved with self joining the constrained query as subquery and selecting
-         * the ids which are not matching to anything (i.e., is null).
-         * 
-         * The constraints usually remove only a small amount of results, which is why the non
-         * matching results are looked up and removed, instead of returning a collection with
-         * all the valid results.
-         */
-        $discardIds = $builder->model->newQuery()
-            ->select($qualifiedKeyName)
-            ->leftJoin(DB::raw('(' . $sub->getQuery()->toSql() .') as sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
-            ->addBinding($sub->getQuery()->getBindings(), 'join')
-            ->whereIn($qualifiedKeyName, $searchResults)
-            ->whereNull($subQualifiedKeyName)
-            ->pluck($builder->model->getKeyName());
-
-        // returns values of $results['ids'] that are not part of $discardIds
-        $filtered = collect($results['ids'])->diff($discardIds);
+        $filtered = $this->discardIdsFromResultSetByConstraints($builder, $results['ids']);
 
         $results['hits'] = $filtered->count();
 
         $chunks = array_chunk($filtered->toArray(), $perPage);
-        
+
         if (empty($chunks)) {
             return $results;
         }
@@ -161,7 +136,7 @@ class TNTSearchEngine extends Engine
         } else {
             $results['ids'] = end($chunks);
         }
-        
+
         return $results;
     }
 
@@ -200,20 +175,6 @@ class TNTSearchEngine extends Engine
     }
 
     /**
-     * Get the filter array for the query.
-     *
-     * @param Builder $builder
-     *
-     * @return array
-     */
-    protected function filters(Builder $builder)
-    {
-        return collect($builder->wheres)->map(function ($value, $key) {
-            return $key.'='.$value;
-        })->values()->all();
-    }
-
-    /**
      * Map the given results to instances of the given model.
      *
      * @param mixed                               $results
@@ -231,6 +192,10 @@ class TNTSearchEngine extends Engine
 
         $builder = $this->getBuilder($model);
         
+        if($this->builder->queryCallback){
+            call_user_func($this->builder->queryCallback, $builder);
+        }
+
         if($this->builder->queryCallback){
             call_user_func($this->builder->queryCallback, $builder);
         }
@@ -262,28 +227,20 @@ class TNTSearchEngine extends Engine
      */
     public function getBuilder($model)
     {
+        if (isset($this->query)) {
+            return $this->query;
+        }
+
         // get query as given constraint or create a new query
         $builder = isset($this->builder->constraints) ? $this->builder->constraints : $model->newQuery();
 
-        // iterate over given where clauses
-        $builder = collect($this->builder->wheres)->map(function ($value, $key) {
-            // for reduce function combine key and value into array
-            return [$key, $value];
-        })->reduce(function ($builder, $where) {
-            // separate key, value again
-            list($key, $value) = $where;
-            return $builder->where($key, $value);
-        }, $builder);
+        $builder = $this->handleSoftDeletes($builder, $model);
 
-        //iterate over given orderBy clauses - should be only one
-        return collect($this->builder->orders)->map(function ($value, $key) {
-            // for reduce function combine key and value into array
-            return [$value["column"], $value["direction"]];
-        })->reduce(function ($builder, $orderBy) {
-            // separate key, value again
-            list($column, $direction) = $orderBy;
-            return $builder->orderBy($column, $direction);
-        }, $builder);
+        $builder = $this->applyWheres($builder);
+
+        $builder = $this->applyOrders($builder);
+
+        return $this->query = $builder;
     }
 
     /**
@@ -318,5 +275,131 @@ class TNTSearchEngine extends Engine
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->setPrimaryKey($model->getKeyName());
         }
+    }
+
+    /**
+     * The search index results ($results['ids']) need to be compared against our query
+     * that contains the constraints.
+     *
+     * To get the correct results and counts for the pagination, we remove those ids
+     * from the search index results that were found by the search but are not part of
+     * the query ($sub) that is constrained.
+     *
+     * This is achieved with self joining the constrained query as subquery and selecting
+     * the ids which are not matching to anything (i.e., is null).
+     *
+     * The constraints usually remove only a small amount of results, which is why the non
+     * matching results are looked up and removed, instead of returning a collection with
+     * all the valid results.
+     */
+    private function discardIdsFromResultSetByConstraints($builder, $searchResults)
+    {
+        $qualifiedKeyName = $builder->model->getQualifiedKeyName();  // tableName.id
+        $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
+
+        $sub = $this->getBuilder($builder->model)->whereIn(
+            $qualifiedKeyName, $searchResults
+        ); // sub query for left join
+
+        $discardIds = $builder->model->newQuery()
+            ->select($qualifiedKeyName)
+            ->leftJoin(DB::raw('(' . $sub->getQuery()->toSql() .') as sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->addBinding($sub->getQuery()->getBindings(), 'join')
+            ->whereIn($qualifiedKeyName, $searchResults)
+            ->whereNull($subQualifiedKeyName)
+            ->pluck($builder->model->getKeyName());
+
+        // returns values of $results['ids'] that are not part of $discardIds
+        return collect($searchResults)->diff($discardIds);
+    }
+
+    /**
+     * Determine if the given model uses soft deletes.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @return bool
+     */
+    protected function usesSoftDelete($model)
+    {
+        return in_array(SoftDeletes::class, class_uses_recursive($model));
+    }
+
+    /**
+     * Determine if soft delete is active and depending on state return the
+     * appropriate builder.
+     *
+     * @param  Builder  $builder
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @return Builder
+     */
+    private function handleSoftDeletes($builder, $model)
+    {
+        // remove where statement for __soft_deleted when soft delete is not active
+        // does not show soft deleted items when trait is attached to model and
+        // config('scout.soft_delete') is false
+        if (!$this->usesSoftDelete($model) || !config('scout.soft_delete', true)) {
+            unset($this->builder->wheres['__soft_deleted']);
+            return $builder;
+        }
+
+        /**
+         * Use standard behaviour of Laravel Scout builder class to support soft deletes.
+         *
+         * When no __soft_deleted statement is given return all entries
+         */
+        if (!in_array('__soft_deleted', $this->builder->wheres)) {
+            return $builder->withTrashed();
+        }
+
+        /**
+         * When __soft_deleted is 1 then return only soft deleted entries
+         */
+        if ($this->builder->wheres['__soft_deleted']) {
+            $builder = $builder->onlyTrashed();
+        }
+
+        /**
+         * Returns all undeleted entries, default behaviour
+         */
+        unset($this->builder->wheres['__soft_deleted']);
+        return $builder;
+    }
+
+    /**
+     * Apply where statements as constraints to the query builder.
+     *
+     * @param Builder $builder
+     * @return \Illuminate\Support\Collection
+     */
+    private function applyWheres($builder)
+    {
+        // iterate over given where clauses
+        return collect($this->builder->wheres)->map(function ($value, $key) {
+            // for reduce function combine key and value into array
+            return [$key, $value];
+        })->reduce(function ($builder, $where) {
+            // separate key, value again
+            list($key, $value) = $where;
+            return $builder->where($key, $value);
+        }, $builder);
+    }
+
+    /**
+     * Apply order by statements as constraints to the query builder.
+     *
+     * @param Builder $builder
+     * @return \Illuminate\Support\Collection
+     */
+    private function applyOrders($builder)
+    {
+        //iterate over given orderBy clauses - should be only one
+        return collect($this->builder->orders)->map(function ($value, $key) {
+            // for reduce function combine key and value into array
+            return [$value["column"], $value["direction"]];
+        })->reduce(function ($builder, $orderBy) {
+            // separate key, value again
+            list($column, $direction) = $orderBy;
+            return $builder->orderBy($column, $direction);
+        }, $builder);
     }
 }
