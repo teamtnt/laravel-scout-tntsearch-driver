@@ -196,10 +196,6 @@ class TNTSearchEngine extends Engine
             call_user_func($this->builder->queryCallback, $builder);
         }
 
-        if($this->builder->queryCallback){
-            call_user_func($this->builder->queryCallback, $builder);
-        }
-
         $models = $builder->whereIn(
             $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
