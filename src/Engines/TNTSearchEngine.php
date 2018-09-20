@@ -18,11 +18,9 @@ class TNTSearchEngine extends Engine
     protected $tnt;
 
     /**
-     * Used to query database with given constraints.
-     *
      * @var Builder
      */
-    protected $query;
+    protected $builder;
 
     /**
      * Create a new engine instance.
