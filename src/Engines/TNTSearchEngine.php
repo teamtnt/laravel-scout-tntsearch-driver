@@ -18,11 +18,6 @@ class TNTSearchEngine extends Engine
     protected $tnt;
 
     /**
-     * @var Builder
-     */
-    protected $builder;
-
-    /**
      * Used to query database with given constraints.
      *
      * @var Builder
@@ -223,10 +218,6 @@ class TNTSearchEngine extends Engine
      */
     public function getBuilder($model)
     {
-        if (isset($this->query)) {
-            return $this->query;
-        }
-
         // get query as given constraint or create a new query
         $builder = isset($this->builder->constraints) ? $this->builder->constraints : $model->newQuery();
 
@@ -236,7 +227,7 @@ class TNTSearchEngine extends Engine
 
         $builder = $this->applyOrders($builder);
 
-        return $this->query = $builder;
+	return $builder;
     }
 
     /**
