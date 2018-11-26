@@ -2,13 +2,13 @@
 
 namespace TeamTNT\Scout\Engines;
 
-use Laravel\Scout\Builder;
-use TeamTNT\TNTSearch\TNTSearch;
-use Laravel\Scout\Engines\Engine;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
+use Laravel\Scout\Builder;
+use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
+use TeamTNT\TNTSearch\TNTSearch;
 
 class TNTSearchEngine extends Engine
 {
@@ -184,8 +184,8 @@ class TNTSearchEngine extends Engine
         $keys = collect($results['ids'])->values()->all();
 
         $builder = $this->getBuilder($model);
-        
-        if($this->builder->queryCallback){
+
+        if ($this->builder->queryCallback) {
             call_user_func($this->builder->queryCallback, $builder);
         }
 
@@ -225,7 +225,7 @@ class TNTSearchEngine extends Engine
 
         $builder = $this->applyOrders($builder);
 
-	return $builder;
+        return $builder;
     }
 
     /**
@@ -279,8 +279,8 @@ class TNTSearchEngine extends Engine
      */
     private function discardIdsFromResultSetByConstraints($builder, $searchResults)
     {
-        $qualifiedKeyName = $builder->model->getQualifiedKeyName();  // tableName.id
-        $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
+        $qualifiedKeyName    = $builder->model->getQualifiedKeyName(); // tableName.id
+        $subQualifiedKeyName = 'sub.'.$builder->model->getKeyName(); // sub.id
 
         $sub = $this->getBuilder($builder->model)->whereIn(
             $qualifiedKeyName, $searchResults
@@ -288,7 +288,7 @@ class TNTSearchEngine extends Engine
 
         $discardIds = $builder->model->newQuery()
             ->select($qualifiedKeyName)
-            ->leftJoin(DB::raw('(' . $sub->getQuery()->toSql() .') as sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->leftJoin(DB::raw('('.$sub->getQuery()->toSql().') as sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
             ->addBinding($sub->getQuery()->getBindings(), 'join')
             ->whereIn($qualifiedKeyName, $searchResults)
             ->whereNull($subQualifiedKeyName)
@@ -386,5 +386,20 @@ class TNTSearchEngine extends Engine
             list($column, $direction) = $orderBy;
             return $builder->orderBy($column, $direction);
         }, $builder);
+    }
+
+    /**
+     * Flush all of the model's records from the engine.
+     *
+     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @return void
+     */
+    public function flush($model)
+    {
+        $indexName   = $model->searchableAs();
+        $pathToIndex = $this->tnt->config['storage']."/{$indexName}.index";
+        if (file_exists($pathToIndex)) {
+            unlink($pathToIndex);
+        }
     }
 }
