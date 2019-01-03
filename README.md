@@ -120,7 +120,7 @@ Then, sync the data with the search service like:
 
 `php artisan scout:import App\\Post`
 
-If you have a lot of records and want to speed it up you can run:
+If you have a lot of records and want to speed it up you can run (note that with this you can no longer use model-relations in your `toSearchableArray()`):
 
 `php artisan tntsearch:import App\\Post`
 
