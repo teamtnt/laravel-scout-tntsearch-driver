@@ -57,7 +57,7 @@ class ImportCommand extends Command
             $query = '*';
         }
 
-        $indexer->query("SELECT $query FROM {$model->getTable()};");
+        $indexer->query("SELECT $query FROM {$tableName};");
 
         $indexer->run();
         $this->info('All ['.$class.'] records have been imported.');
