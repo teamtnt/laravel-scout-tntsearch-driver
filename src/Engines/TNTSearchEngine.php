@@ -288,7 +288,7 @@ class TNTSearchEngine extends Engine
 
         $discardIds = $builder->model->newQuery()
             ->select($qualifiedKeyName)
-            ->leftJoin(DB::raw('('.$sub->getQuery()->toSql().') as sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->leftJoin(DB::raw('('.$sub->getQuery()->toSql().') as '. DB::connection()->getTablePrefix() .'sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
             ->addBinding($sub->getQuery()->getBindings(), 'join')
             ->whereIn($qualifiedKeyName, $searchResults)
             ->whereNull($subQualifiedKeyName)
