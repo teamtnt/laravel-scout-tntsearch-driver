@@ -11,12 +11,12 @@
         "php": ">=7.1",
         "teamtnt/tntsearch": "2.*",
         "laravel/scout": "7.*",
-        "illuminate/bus": "~5.4",
-        "illuminate/contracts": "~5.4",
-        "illuminate/database": "~5.4",
-        "illuminate/pagination": "~5.4",
-        "illuminate/queue": "~5.4",
-        "illuminate/support": "~5.4"
+        "illuminate/bus": "~5.4|^6.0",
+        "illuminate/contracts": "~5.4|^6.0",
+        "illuminate/database": "~5.4|^6.0",
+        "illuminate/pagination": "~5.4|^6.0",
+        "illuminate/queue": "~5.4|^6.0",
+        "illuminate/support": "~5.4|^6.0"
     },
     "require-dev": {
         "mockery/mockery": "~0.9",
