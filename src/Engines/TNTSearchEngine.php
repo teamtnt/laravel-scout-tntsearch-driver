@@ -127,7 +127,7 @@ class TNTSearchEngine extends Engine
         if (array_key_exists($page - 1, $chunks)) {
             $results['ids'] = $chunks[$page - 1];
         } else {
-            $results['ids'] = end($chunks);
+            $results['ids'] = [];
         }
 
         return $results;
