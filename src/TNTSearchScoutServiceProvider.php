@@ -1,5 +1,6 @@
 <?php namespace TeamTNT\Scout;
 
+use TeamTNT\TNTSearch\TNTGeoSearch;
 use TeamTNT\TNTSearch\TNTSearch;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Builder;
@@ -28,7 +29,15 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
             $this->setFuzziness($tnt);
             $this->setAsYouType($tnt);
 
-            return new TNTSearchEngine($tnt);
+            $geotnt = null;
+            if (!empty($config['geoIndex'])) {
+                $geotnt = new TNTGeoSearch();
+
+                $geotnt->loadConfig($config);
+                $geotnt->setDatabaseHandle(app('db')->connection()->getPdo());
+            }
+
+            return new TNTSearchEngine($tnt, $geotnt);
         });
 
         if ($this->app->runningInConsole()) {
