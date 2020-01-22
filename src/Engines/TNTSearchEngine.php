@@ -199,7 +199,7 @@ class TNTSearchEngine extends Engine
         }
 
         // sort models by tnt search result set
-        return collect($results['ids'])->map(function ($hit) use ($models) {
+        return $this->collect($results['ids'])->map(function ($hit) use ($models) {
             if (isset($models[$hit])) {
                 return $models[$hit];
             }
@@ -401,5 +401,15 @@ class TNTSearchEngine extends Engine
         if (file_exists($pathToIndex)) {
             unlink($pathToIndex);
         }
+    }
+    
+    /**
+     * Create a Eloquent collection from the given value.
+     * @param $value
+     * @return Collection
+     */
+    private function collect($value): Collection
+    {
+        return new Collection($value);
     }
 }
