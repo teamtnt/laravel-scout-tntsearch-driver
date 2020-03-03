@@ -1,15 +1,19 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Illuminate\Database\Eloquent\Collection;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
 
-class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
+class TNTSearchEngineTest extends TestCase
 {
-    public function tearDown()
+    public function tearDown(): void
     {
         Mockery::close();
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function test_update_adds_objects_to_index()
     {
         $client = Mockery::mock('TeamTNT\TNTSearch\TNTSearch');
