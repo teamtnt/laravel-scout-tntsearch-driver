@@ -10,16 +10,20 @@ php:
 
 env:
   matrix:
-    - laravel=^5.5 scout=^7.0
-    - laravel=^6.0 scout=^7.0
-    - laravel=^6.0 scout=^8.0
-    - laravel=^7.0 scout=^8.0
+    - laravel=^5.5 scout=^7.0 minPhp=7.1
+    - laravel=^6.0 scout=^7.0 minPhp=7.2
+    - laravel=^6.0 scout=^8.0 minPhp=7.2
+    - laravel=^7.0 scout=^8.0 minPhp=7.2
 
 cache:
   directories:
     - $HOME/.composer/cache
 
 before_script:
+  - if [ ${TRAVIS_PHP_VERSION} -lt ${minPhp} ]; then
+      echo "Skip tests.";
+      exit 0;
+    fi
   - travis_retry composer require "illuminate/bus:${laravel}" --no-update
   - travis_retry composer require "illuminate/contracts:${laravel}" --no-update
   - travis_retry composer require "illuminate/database:${laravel}" --no-update
