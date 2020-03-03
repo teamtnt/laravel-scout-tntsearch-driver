@@ -6,7 +6,7 @@ use TeamTNT\Scout\Engines\TNTSearchEngine;
 
 class TNTSearchEngineTest extends TestCase
 {
-    public function tearDown(): void
+    public function tearDown()
     {
         Mockery::close();
     }
