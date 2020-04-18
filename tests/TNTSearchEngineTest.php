@@ -29,7 +29,36 @@ class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
         $index->shouldReceive('update');
         $index->shouldReceive('indexEndTransaction');
 
-        $engine = new TNTSearchEngine($client);
+        $geoClient = Mockery::mock('TeamTNT\TNTSearch\TNTGeoSearch');
+
+        $config = [
+            'storage'  => '/',
+            'fuzziness' => false,
+            'fuzzy' => [
+                'prefix_length' => 2,
+                'max_expansions' => 50,
+                'distance' => 2
+            ],
+            'asYouType' => false,
+            'searchBoolean' => false,
+        ];
+
+        $geoClient->shouldReceive('getIndex')
+            ->andReturn($geoIndex = Mockery::mock('TeamTNT\TNTSearch\Indexer\TNTGeoIndexer'))
+            ->andSet('config', $config);
+        $geoIndex->shouldReceive('loadConfig');
+        $geoIndex->shouldReceive('createIndex')
+            ->with('table.geoindex');
+        $geoIndex->shouldReceive('setDatabaseHandle');
+        $geoIndex->shouldReceive('setPrimaryKey');
+        $geoClient->shouldReceive('selectIndex');
+        $geoIndex->shouldReceive('indexBeginTransaction');
+        $geoIndex->shouldReceive('prepareAndExecuteStatement');
+        $geoIndex->shouldReceive('insert');
+        $geoIndex->shouldReceive('indexEndTransaction');
+
+
+        $engine = new TNTSearchEngine($client, $geoClient);
         $engine->update(Collection::make([new TNTSearchEngineTestModel()]));
     }
 }

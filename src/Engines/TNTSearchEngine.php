@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
+use TeamTNT\TNTSearch\TNTGeoSearch;
 use TeamTNT\TNTSearch\TNTSearch;
 
 class TNTSearchEngine extends Engine
@@ -18,6 +19,11 @@ class TNTSearchEngine extends Engine
     protected $tnt;
 
     /**
+     * @var TNTGeoSearch
+     */
+    protected $geotnt;
+
+    /**
      * @var Builder
      */
     protected $builder;
@@ -26,10 +32,12 @@ class TNTSearchEngine extends Engine
      * Create a new engine instance.
      *
      * @param TNTSearch $tnt
+     * @param TNTGeoSearch|null $geotnt
      */
-    public function __construct(TNTSearch $tnt)
+    public function __construct(TNTSearch $tnt, TNTGeoSearch $geotnt = null)
     {
         $this->tnt = $tnt;
+        $this->geotnt = $geotnt;
     }
 
     /**
@@ -46,21 +54,51 @@ class TNTSearchEngine extends Engine
         $index = $this->tnt->getIndex();
         $index->setPrimaryKey($models->first()->getKeyName());
 
+        $geoindex = null;
+        if ($this->geotnt) {
+            $this->geotnt->selectIndex("{$models->first()->searchableAs()}.geoindex");
+            $geoindex = $this->geotnt->getIndex();
+            $geoindex->loadConfig($this->geotnt->config);
+            $geoindex->setPrimaryKey($models->first()->getKeyName());
+            $geoindex->indexBeginTransaction();
+        }
+
         $index->indexBeginTransaction();
-        $models->each(function ($model) use ($index) {
+        $models->each(function ($model) use ($index, $geoindex) {
             $array = $model->toSearchableArray();
 
             if (empty($array)) {
                 return;
             }
 
+            if ($geoindex) {
+                $latitude = isset($array['latitude']) ? (float) $array['latitude'] : null;
+                $longitude = isset($array['longitude']) ? (float) $array['longitude'] : null;
+                unset($array['longitude']);
+                unset($array['latitude']);
+            }
+
             if ($model->getKey()) {
                 $index->update($model->getKey(), $array);
+                if ($geoindex) {
+                    $geoindex->prepareAndExecuteStatement(
+                        'DELETE FROM locations WHERE doc_id = :documentId;',
+                        [['key' => ':documentId', 'value' => $model->getKey()]]
+                    );
+                }
             } else {
                 $index->insert($array);
             }
+            if ($geoindex && !empty($latitude) && !empty($longitude)) {
+                $array['latitude'] = $latitude;
+                $array['longitude'] = $longitude;
+                $geoindex->insert($array);
+            }
         });
         $index->indexEndTransaction();
+        if ($this->geotnt) {
+            $geoindex->indexEndTransaction();
+        }
     }
 
     /**
@@ -78,6 +116,17 @@ class TNTSearchEngine extends Engine
             $index = $this->tnt->getIndex();
             $index->setPrimaryKey($model->getKeyName());
             $index->delete($model->getKey());
+
+            if ($this->geotnt) {
+                $this->geotnt->selectIndex("{$model->searchableAs()}.geoindex");
+                $index = $this->geotnt->getIndex();
+                $index->loadConfig($this->geotnt->config);
+                $index->setPrimaryKey($model->getKeyName());
+                $index->prepareAndExecuteStatement(
+                    'DELETE FROM locations WHERE doc_id = :documentId;',
+                    [['key' => ':documentId', 'value' => $model->getKey()]]
+                );
+            }
         });
     }
 
@@ -145,6 +194,9 @@ class TNTSearchEngine extends Engine
         $index = $builder->index ?: $builder->model->searchableAs();
         $limit = $builder->limit ?: 10000;
         $this->tnt->selectIndex("{$index}.index");
+        if ($this->geotnt) {
+            $this->geotnt->selectIndex("{$index}.geoindex");
+        }
 
         $this->builder = $builder;
 
@@ -160,6 +212,14 @@ class TNTSearchEngine extends Engine
                 $options
             );
         }
+
+        if (is_array($builder->query)) {
+            $location = $builder->query['location'];
+            $distance = $builder->query['distance'];
+            $limit = array_key_exists('limit', $builder->query) ? $builder->query['limit'] : 10000;
+            return $this->geotnt->findNearest($location, $distance, $limit);
+        }
+
         if (isset($this->tnt->config['searchBoolean']) ? $this->tnt->config['searchBoolean'] : false) {
             return $this->tnt->searchBoolean($builder->query, $limit);
         } else {
@@ -257,6 +317,13 @@ class TNTSearchEngine extends Engine
 
         if (!file_exists($this->tnt->config['storage']."/{$indexName}.index")) {
             $indexer = $this->tnt->createIndex("$indexName.index");
+            $indexer->setDatabaseHandle($model->getConnection()->getPdo());
+            $indexer->setPrimaryKey($model->getKeyName());
+        }
+        if ($this->geotnt && !file_exists($this->tnt->config['storage']."/{$indexName}.geoindex")) {
+            $indexer = $this->geotnt->getIndex();
+            $indexer->loadConfig($this->geotnt->config);
+            $indexer->createIndex("$indexName.geoindex");
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->setPrimaryKey($model->getKeyName());
         }
@@ -400,6 +467,13 @@ class TNTSearchEngine extends Engine
         $pathToIndex = $this->tnt->config['storage']."/{$indexName}.index";
         if (file_exists($pathToIndex)) {
             unlink($pathToIndex);
+        }
+
+        if ($this->geotnt){
+            $pathToGeoIndex = $this->geotnt->config['storage']."/{$indexName}.geoindex";
+            if (file_exists($pathToGeoIndex)) {
+                unlink($pathToGeoIndex);
+            }
         }
     }
 }
