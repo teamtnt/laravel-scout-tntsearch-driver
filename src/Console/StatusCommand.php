@@ -92,7 +92,12 @@ class StatusCommand extends Command
             $configFiles = Finder::create()->files()->name('*.php')->notName('*.blade.php')->in(app()->path());
 
             foreach ($configFiles->files() as $file) {
-                require_once $file;
+                try {
+                    require_once $file;
+                } catch (\Throwable $e) {
+                    //skiping if the file cannot be loaded
+                }
+
             }
 
             self::$declaredClasses = get_declared_classes();
