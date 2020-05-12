@@ -128,19 +128,19 @@ After that you can search your models with:
 
 `Post::search('Bugs Bunny')->get();`
 
-##Scout status 
+## Scout status 
 
 `php artisan scout:status`
 
 With this simple command you'll get a quick overview of your search indices.
 
-![Image of Scout Status Command](https://tnt.github.com/img/scout_status.png)
+![Image of Scout Status Command](https://teamtnt.github.io/img/scout_status.png)
 
 Or you can pass a searchable model argument:
 
 `php artisan scout:status "App\Models\Post"`
 
-![Image of Scout Status Command](https://tnt.github.com/img/scout_status_single.png)
+![Image of Scout Status Command](https://teamtnt.github.io/img/scout_status_single_new.png)
 
 ## Constraints
 
@@ -202,6 +202,7 @@ class PostController extends Controller
 ## Adding via Query
 The `searchable()` method will chunk the results of the query and add the records to your search index. 
 
+```php
 $post = Post::find(1);
 
 // You may also add record via collection...
@@ -213,6 +214,7 @@ $posts = Post::where('year', '>', '2018')->get();
 
 // You may also add records via collections...
 $posts->searchable();
+```
 
 When using constraints apply it after the constraints are added to the query, as seen in the above example.
 
