@@ -1,5 +1,6 @@
 <?php namespace TeamTNT\Scout;
 
+use TeamTNT\Scout\Console\StatusCommand;
 use TeamTNT\TNTSearch\TNTSearch;
 use Laravel\Scout\EngineManager;
 use Laravel\Scout\Builder;
@@ -18,13 +19,13 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
     {
         $this->app[EngineManager::class]->extend('tntsearch', function ($app) {
             $tnt = new TNTSearch();
-            
+
             $driver = config('database.default');
             $config = config('scout.tntsearch') + config("database.connections.{$driver}");
 
             $tnt->loadConfig($config);
             $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
-            
+
             $this->setFuzziness($tnt);
             $this->setAsYouType($tnt);
 
@@ -34,6 +35,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 ImportCommand::class,
+                StatusCommand::class
             ]);
         }
 
