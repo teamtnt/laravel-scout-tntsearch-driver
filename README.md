@@ -128,7 +128,7 @@ After that you can search your models with:
 
 `Post::search('Bugs Bunny')->get();`
 
-##Scout status 
+## Scout status 
 
 `php artisan scout:status`
 
