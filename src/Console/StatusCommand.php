@@ -96,10 +96,10 @@ class StatusCommand extends Command
                     require_once $file;
                 } catch (\Exception $e) {
                     //skiping if the file cannot be loaded
-                }
-                catch (\Throwable $e) {
+                } catch (\Throwable $e) {
                     //skiping if the file cannot be loaded
                 }
+            }
 
             self::$declaredClasses = get_declared_classes();
         }
