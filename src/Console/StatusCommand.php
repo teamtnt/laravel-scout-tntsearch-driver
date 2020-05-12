@@ -94,11 +94,12 @@ class StatusCommand extends Command
             foreach ($configFiles->files() as $file) {
                 try {
                     require_once $file;
-                } catch (\Throwable $e) {
+                } catch (\Exception $e) {
                     //skiping if the file cannot be loaded
                 }
-
-            }
+                catch (\Throwable $e) {
+                    //skiping if the file cannot be loaded
+                }
 
             self::$declaredClasses = get_declared_classes();
         }
