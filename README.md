@@ -134,13 +134,13 @@ After that you can search your models with:
 
 With this simple command you'll get a quick overview of your search indices.
 
-![Image of Scout Status Command](https://tnt.github.com/img/scout_status.png)
+![Image of Scout Status Command](https://teamtnt.github.io/img/scout_status.png)
 
 Or you can pass a searchable model argument:
 
 `php artisan scout:status "App\Models\Post"`
 
-![Image of Scout Status Command](https://tnt.github.com/img/scout_status_single.png)
+![Image of Scout Status Command](https://teamtnt.github.io/img/scout_status_single.png)
 
 ## Constraints
 
