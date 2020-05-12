@@ -202,6 +202,7 @@ class PostController extends Controller
 ## Adding via Query
 The `searchable()` method will chunk the results of the query and add the records to your search index. 
 
+```php
 $post = Post::find(1);
 
 // You may also add record via collection...
@@ -213,6 +214,7 @@ $posts = Post::where('year', '>', '2018')->get();
 
 // You may also add records via collections...
 $posts->searchable();
+```
 
 When using constraints apply it after the constraints are added to the query, as seen in the above example.
 
