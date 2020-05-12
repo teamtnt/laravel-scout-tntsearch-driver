@@ -128,6 +128,20 @@ After that you can search your models with:
 
 `Post::search('Bugs Bunny')->get();`
 
+##Scout status 
+
+`php artisan scout:status`
+
+With this simple command you'll get a quick overview of your search indices.
+
+![Image of Scout Status Command](https://tnt.github.com/img/scout_status.png)
+
+Or you can pass a searchable model argument:
+
+`php artisan scout:status "App\Models\Post"`
+
+![Image of Scout Status Command](https://tnt.github.com/img/scout_status_single.png)
+
 ## Constraints
 
 Additionally to `where()` statements as conditions, you're able to use Eloquent queries to constrain your search. This allows you to take relationships into account.
