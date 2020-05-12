@@ -140,7 +140,6 @@ Or you can pass a searchable model argument:
 
 `php artisan scout:status "App\Models\Post"`
 
-
 ![Image of Scout Status Command](https://teamtnt.github.io/img/scout_status_single.png)
 
 ## Constraints
