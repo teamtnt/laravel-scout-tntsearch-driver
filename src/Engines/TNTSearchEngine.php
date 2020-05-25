@@ -199,7 +199,7 @@ class TNTSearchEngine extends Engine
         }
 
         // sort models by tnt search result set
-        return collect($results['ids'])->map(function ($hit) use ($models) {
+        return $model->newCollection($results['ids'])->map(function ($hit) use ($models) {
             if (isset($models[$hit])) {
                 return $models[$hit];
             }
