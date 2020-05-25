@@ -191,7 +191,7 @@ class PostController extends Controller
 
         $post->orderBy('updated_at', 'asc');
 
-        $paginator = $department->paginate(10);
+        $paginator = $post->paginate(10);
         $posts = $paginator->getCollection();
 
         // return posts
