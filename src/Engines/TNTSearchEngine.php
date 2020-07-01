@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
+use TeamTNT\Scout\Events\SearchPerformed;
 use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
 use TeamTNT\TNTSearch\TNTSearch;
 
@@ -161,9 +162,14 @@ class TNTSearchEngine extends Engine
             );
         }
         if (isset($this->tnt->config['searchBoolean']) ? $this->tnt->config['searchBoolean'] : false) {
-            return $this->tnt->searchBoolean($builder->query, $limit);
+            $res = $this->tnt->searchBoolean($builder->query, $limit);
+            event(new SearchPerformed($builder, $res, true));
+            return $res;
+
         } else {
-            return $this->tnt->search($builder->query, $limit);
+            $res = $this->tnt->search($builder->query, $limit);
+            event(new SearchPerformed($builder, $res));
+            return $res;
         }
     }
 
@@ -288,7 +294,7 @@ class TNTSearchEngine extends Engine
 
         $discardIds = $builder->model->newQuery()
             ->select($qualifiedKeyName)
-            ->leftJoin(DB::raw('('.$sub->getQuery()->toSql().') as '. $builder->model->getConnection()->getTablePrefix() .'sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->leftJoin(DB::raw('('.$sub->getQuery()->toSql().') as '.$builder->model->getConnection()->getTablePrefix().'sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
             ->addBinding($sub->getQuery()->getBindings(), 'join')
             ->whereIn($qualifiedKeyName, $searchResults)
             ->whereNull($subQualifiedKeyName)
