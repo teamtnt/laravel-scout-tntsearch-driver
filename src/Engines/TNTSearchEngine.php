@@ -124,6 +124,10 @@ class TNTSearchEngine extends Engine
         if (empty($chunks)) {
             return $results;
         }
+        
+        if ($this->builder->orders[0]['direction']==="desc"){
+            rsort($chunks);
+        }
 
         if (array_key_exists($page - 1, $chunks)) {
             $results['ids'] = $chunks[$page - 1];
