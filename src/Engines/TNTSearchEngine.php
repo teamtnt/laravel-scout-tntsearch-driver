@@ -119,14 +119,15 @@ class TNTSearchEngine extends Engine
 
         $results['hits'] = $filtered->count();
 
-        $chunks = array_chunk($filtered->toArray(), $perPage);
+        $filtered_array = $filtered->toArray();
+        if ($this->builder->orders[0]['direction']=="desc"){
+            rsort($filtered_array);
+        }
+
+        $chunks = array_chunk($filtered_array, $perPage);
 
         if (empty($chunks)) {
             return $results;
-        }
-        
-        if ($this->builder->orders[0]['direction']==="desc"){
-            rsort($chunks);
         }
 
         if (array_key_exists($page - 1, $chunks)) {
