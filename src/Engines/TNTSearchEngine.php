@@ -119,22 +119,20 @@ class TNTSearchEngine extends Engine
 
         $results['hits'] = $filtered->count();
 
-        $filtered_array = $filtered->toArray();
-        if ($this->builder->orders[0]['direction']=="desc"){
-            rsort($filtered_array);
-        }
-
-        $chunks = array_chunk($filtered_array, $perPage);
+        /*$chunks = array_chunk($filtered->toArray(), $perPage);
 
         if (empty($chunks)) {
             return $results;
-        }
+        }*/
 
-        if (array_key_exists($page - 1, $chunks)) {
+        /*if (array_key_exists($page - 1, $chunks)) {
             $results['ids'] = $chunks[$page - 1];
         } else {
             $results['ids'] = [];
-        }
+        }*/
+
+        $results['per_page'] = $perPage;
+        $results['page'] = $page;
 
         return $results;
     }
@@ -200,21 +198,17 @@ class TNTSearchEngine extends Engine
             call_user_func($this->builder->queryCallback, $builder);
         }
 
-        $models = $builder->whereIn(
-            $model->getQualifiedKeyName(), $keys
-        )->get()->keyBy($model->getKeyName());
-
-        // sort models by user choice
-        if (!empty($this->builder->orders)) {
-            return $models->values();
+        if (array_key_exists('per_page',$results)){
+            $models = $builder->whereIn(
+                $model->getQualifiedKeyName(), $keys
+            )->paginate($results['per_page'],['*'],'page',$results['page']);
+        }else{
+            $models = $builder->whereIn(
+                $model->getQualifiedKeyName(), $keys
+            )->get();
         }
 
-        // sort models by tnt search result set
-        return $model->newCollection($results['ids'])->map(function ($hit) use ($models) {
-            if (isset($models[$hit])) {
-                return $models[$hit];
-            }
-        })->filter()->values();
+        return $models;
     }
 
     /**
