@@ -52,9 +52,9 @@ class ImportCommand extends Command
         $indexer->setPrimaryKey($model->getKeyName());
 
         $availableColumns = Schema::connection($driver)->getColumnListing($model->getTable());
-        $desiredColumns = array_keys($model->toSearchableArray());
-
         $desiredColumns = array_keys($model->first()->toSearchableArray());
+
+        $fields = array_intersect($desiredColumns, $availableColumns);
 
         $query = $db->table($model->getTable());
 
