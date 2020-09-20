@@ -79,7 +79,7 @@ class StatusCommand extends Command
         }
 
         $this->output->progressFinish();
-        $this->output->table($headers, $rows, $tableStyle = 'default', $columnStyles = []);
+        $this->output->table($headers, $rows);
     }
 
     /**
