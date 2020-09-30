@@ -13,6 +13,8 @@ use TeamTNT\TNTSearch\TNTSearch;
 
 class TNTSearchEngine extends Engine
 {
+
+    private $filters;
     /**
      * @var TNTSearch
      */
@@ -161,6 +163,9 @@ class TNTSearchEngine extends Engine
                 $options
             );
         }
+
+        $builder->query = $this->applyFilters('query_expansion', $builder->query, get_class($builder->model));
+
         if (isset($this->tnt->config['searchBoolean']) ? $this->tnt->config['searchBoolean'] : false) {
             $res = $this->tnt->searchBoolean($builder->query, $limit);
             event(new SearchPerformed($builder, $res, true));
@@ -407,5 +412,52 @@ class TNTSearchEngine extends Engine
         if (file_exists($pathToIndex)) {
             unlink($pathToIndex);
         }
+    }
+
+    /**
+     * Adds a filter
+     *
+     * @param  string
+     * @param  callback
+     * @return void
+     */
+    public function addFilter($name, $callback)
+    {
+        if (!is_callable($callback, true)) {
+            throw new InvalidArgumentException(sprintf('Filter is an invalid callback: %s.', print_r($callback, true)));
+        }
+        $this->filters[$name][] = $callback;
+    }
+
+    /**
+     * Returns an array of filters
+     *
+     * @param  string
+     * @return array
+     */
+    public function getFilters($name)
+    {
+        return isset($this->filters[$name]) ? $this->filters[$name] : [];
+    }
+
+    /**
+     * Returns a string on which a filter is applied
+     *
+     * @param  string
+     * @param  string
+     * @return string
+     */
+    public function applyFilters($name, $result, $model)
+    {
+        foreach ($this->getFilters($name) as $callback) {
+            // prevent fatal errors, do your own warning or
+            // exception here as you need it.
+            if (!is_callable($callback)) {
+                continue;
+            }
+
+            $result = call_user_func($callback, $result, $model);
+        }
+        return $result;
     }
 }

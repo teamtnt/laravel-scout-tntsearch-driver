@@ -1,21 +1,25 @@
 <?php
 
 use Illuminate\Database\Eloquent\Collection;
+use Mockery as m;
+use PHPUnit\Framework\TestCase;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
+use TeamTNT\TNTSearch\TNTSearch;
 
-class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
+class TNTSearchEngineTest extends TestCase
 {
-    public function tearDown()
+
+    protected function tearDown(): void
     {
-        Mockery::close();
+        m::close();
     }
 
     public function test_update_adds_objects_to_index()
     {
-        $client = Mockery::mock('TeamTNT\TNTSearch\TNTSearch');
+        $client = m::mock('TeamTNT\TNTSearch\TNTSearch');
         $client->shouldReceive('createIndex')
             ->with('table.index')
-            ->andReturn($index = Mockery::mock('TeamTNT\TNTSearch\Indexer\TNTIndexer'));
+            ->andReturn($index = m::mock('TeamTNT\TNTSearch\Indexer\TNTIndexer'));
         $index->shouldReceive('setDatabaseHandle');
         $index->shouldReceive('setPrimaryKey');
         $index->shouldReceive('query');
@@ -31,6 +35,28 @@ class TNTSearchEngineTest extends PHPUnit_Framework_TestCase
 
         $engine = new TNTSearchEngine($client);
         $engine->update(Collection::make([new TNTSearchEngineTestModel()]));
+    }
+
+    public function testApplyingFilters()
+    {
+        $tnt    = new TNTSearch;
+        $engine = new TeamTNT\Scout\Engines\TNTSearchEngine($tnt);
+
+        $engine->addFilter("query_expansion", function ($query, $model) {
+            if ($query == "test" && $model == "TeamTNT\TNTSearch\TNTSearch") {
+                return "modified-".$query;
+            }
+            return $query;
+
+        });
+
+        $query  = $engine->applyFilters('query_expansion', "test", TNTSearch::class);
+        $query2 = $engine->applyFilters('query_expansion', "test", Collection::class);
+        $query3 = $engine->applyFilters('query_expansion', "test2", TNTSearch::class);
+
+        $this->assertTrue($query == "modified-test");
+        $this->assertTrue($query2 == "test");
+        $this->assertTrue($query3 == "test2");
     }
 }
 
