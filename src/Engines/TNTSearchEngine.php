@@ -35,6 +35,11 @@ class TNTSearchEngine extends Engine
         $this->tnt = $tnt;
     }
 
+    public function getTNT()
+    {
+        return $this->tnt;
+    }
+
     /**
      * Update the given model in the index.
      *
