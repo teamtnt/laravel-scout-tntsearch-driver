@@ -193,7 +193,7 @@ class TNTSearchEngine extends Engine
      */
     public function map(Builder $builder, $results, $model)
     {
-        if (is_null($results['ids']) || count($results['ids']) === 0) {
+        if (empty($results['ids'])) {
             return Collection::make();
         }
 
