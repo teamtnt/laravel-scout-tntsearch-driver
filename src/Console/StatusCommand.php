@@ -63,10 +63,10 @@ class StatusCommand extends Command
                 $rowsIndexed = 0;
             }
 
-            $indexedColumns = implode(",", array_keys($model->toSearchableArray()));
-
             $rowsTotal = $model->count();
             $recordsDifference = $rowsTotal - $rowsIndexed;
+
+            $indexedColumns = $rowsTotal ? implode(",", array_keys($model->first()->toSearchableArray())) : '';
 
             if($recordsDifference == 0) {
                 $recordsDifference = '<fg=green>Synchronized</>';
@@ -79,7 +79,7 @@ class StatusCommand extends Command
         }
 
         $this->output->progressFinish();
-        $this->output->table($headers, $rows, $tableStyle = 'default', $columnStyles = []);
+        $this->output->table($headers, $rows);
     }
 
     /**

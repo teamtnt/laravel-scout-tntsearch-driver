@@ -43,11 +43,16 @@ class ImportCommand extends Command
         $tnt->loadConfig($config);
         $tnt->setDatabaseHandle($db->getPdo());
 
+        if(!$model->count()) {
+            $this->info('Nothing to import.');
+            exit(0);
+        }
+        
         $indexer = $tnt->createIndex($model->searchableAs().'.index');
         $indexer->setPrimaryKey($model->getKeyName());
 
         $availableColumns = Schema::connection($driver)->getColumnListing($model->getTable());
-        $desiredColumns = array_keys($model->toSearchableArray());
+        $desiredColumns = array_keys($model->first()->toSearchableArray());
 
         $fields = array_intersect($desiredColumns, $availableColumns);
 
