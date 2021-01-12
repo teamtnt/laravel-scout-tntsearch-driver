@@ -25,6 +25,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
 
             $tnt->loadConfig($config);
             $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
+            $tnt->maxDocs = config('scout.tntsearch.maxDocs', 500);
 
             $this->setFuzziness($tnt);
             $this->setAsYouType($tnt);
