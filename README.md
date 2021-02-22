@@ -224,6 +224,13 @@ An `orderBy()` statement can now be applied to the search query similar to the `
 
 When using constraints apply it after the constraints are added to the query, as seen in the above example.
 
+
+## Premium products
+
+If you find TNT Search to be one of your valuable assets take a look at one of our premium products
+
+[<img src="https://i.imgur.com/TTrzh6w.png" width="420px" />](https://analytics.tnt.studio)
+
 ## Sponsors
 
 Become a sponsor and get your logo on our README on Github with a link to your site. [[Become a sponsor](https://opencollective.com/tntsearch#sponsor)]
@@ -246,24 +253,3 @@ Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com
 
 <a href="https://opencollective.com/laravel-scout-tntsearch-driver#backers" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/backers.svg?width=890"></a>
 
-
-## Sponsors
-
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/laravel-scout-tntsearch-driver#sponsor)]
-
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/0/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/1/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/2/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/3/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/4/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/4/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/5/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/5/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/6/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/6/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/7/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/7/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/8/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/8/avatar.svg"></a>
-<a href="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/9/website" target="_blank"><img src="https://opencollective.com/laravel-scout-tntsearch-driver/sponsor/9/avatar.svg"></a>
-
-
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
