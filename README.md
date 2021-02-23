@@ -229,7 +229,7 @@ When using constraints apply it after the constraints are added to the query, as
 
 If you find TNT Search to be one of your valuable assets, take a look at one of our premium products
 
-[<img src="https://i.imgur.com/TTrzh6w.png" width="420px" />](https://analytics.tnt.studio)
+[<img src="https://i.imgur.com/ujagviB.png" width="420px" />](https://analytics.tnt.studio)
 
 ## Sponsors
 
