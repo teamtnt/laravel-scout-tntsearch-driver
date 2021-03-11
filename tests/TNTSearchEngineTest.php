@@ -14,29 +14,6 @@ class TNTSearchEngineTest extends TestCase
         m::close();
     }
 
-    public function test_update_adds_objects_to_index()
-    {
-        $client = m::mock('TeamTNT\TNTSearch\TNTSearch');
-        $client->shouldReceive('createIndex')
-            ->with('table.index')
-            ->andReturn($index = m::mock('TeamTNT\TNTSearch\Indexer\TNTIndexer'));
-        $index->shouldReceive('setDatabaseHandle');
-        $index->shouldReceive('setPrimaryKey');
-        $index->shouldReceive('query');
-        $index->shouldReceive('run');
-
-        $client->shouldReceive('selectIndex');
-        $client->shouldReceive('getIndex')
-            ->andReturn($index);
-
-        $index->shouldReceive('indexBeginTransaction');
-        $index->shouldReceive('update');
-        $index->shouldReceive('indexEndTransaction');
-
-        $engine = new TNTSearchEngine($client);
-        $engine->update(Collection::make([new TNTSearchEngineTestModel()]));
-    }
-
     public function testApplyingFilters()
     {
         $tnt    = new TNTSearch;
