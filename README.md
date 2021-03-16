@@ -8,6 +8,13 @@
 
 This package makes it easy to add full text search support to your models with Laravel 5.3 to 8.0.
 
+## Premium products
+
+If you find TNT Search to be one of your valuable assets, take a look at one of our premium products
+
+[<img src="https://i.imgur.com/ujagviB.png" width="420px" />](https://analytics.tnt.studio)
+
+
 ## Support us on Open Collective
 
 - [TNTSearch](https://opencollective.com/tntsearch)
@@ -223,13 +230,6 @@ When using constraints apply it after the constraints are added to the query, as
 An `orderBy()` statement can now be applied to the search query similar to the `where()` statement.
 
 When using constraints apply it after the constraints are added to the query, as seen in the above example.
-
-
-## Premium products
-
-If you find TNT Search to be one of your valuable assets, take a look at one of our premium products
-
-[<img src="https://i.imgur.com/ujagviB.png" width="420px" />](https://analytics.tnt.studio)
 
 ## Sponsors
 
