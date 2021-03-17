@@ -252,6 +252,10 @@ class TNTSearchEngine extends Engine
      */
     public function mapIds($results)
     {
+        if (empty($results['ids'])) {
+            return collect();
+        }
+        
         return collect($results['ids'])->values();
     }
 
