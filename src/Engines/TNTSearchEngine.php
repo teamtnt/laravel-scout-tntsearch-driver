@@ -352,7 +352,7 @@ class TNTSearchEngine extends Engine
          *
          * When no __soft_deleted statement is given return all entries
          */
-        if (!in_array('__soft_deleted', $this->builder->wheres)) {
+        if (!array_key_exists('__soft_deleted', $this->builder->wheres)) {
             return $builder->withTrashed();
         }
 
