@@ -192,7 +192,7 @@ class PostController extends Controller
 
         if ($request->searchTerm) {
             $constraints = $post; // not necessary but for better readability
-            $post = Department::search($request->searchTerm)->constrain($constraints);
+            $post = Post::search($request->searchTerm)->constrain($constraints);
         }
 
         $post->where('deleted', false);
