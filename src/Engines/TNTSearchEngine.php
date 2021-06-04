@@ -2,9 +2,12 @@
 
 namespace TeamTNT\Scout\Engines;
 
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\LazyCollection;
+use InvalidArgumentException;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 use TeamTNT\Scout\Events\SearchPerformed;
@@ -223,6 +226,45 @@ class TNTSearchEngine extends Engine
     }
 
     /**
+     * Map the given results to instances of the given model via a lazy collection.
+     *
+     * @param mixed                               $results
+     * @param \Illuminate\Database\Eloquent\Model $model
+     *
+     * @return LazyCollection
+     */
+    public function lazyMap(Builder $builder, $results, $model)
+    {
+        if (empty($results['ids'])) {
+            return LazyCollection::make();
+        }
+
+        $keys = collect($results['ids'])->values()->all();
+
+        $builder = $this->getBuilder($model);
+
+        if ($this->builder->queryCallback) {
+            call_user_func($this->builder->queryCallback, $builder);
+        }
+
+        $models = $builder->whereIn(
+            $model->getQualifiedKeyName(), $keys
+        )->get()->keyBy($model->getKeyName());
+
+        // sort models by user choice
+        if (!empty($this->builder->orders)) {
+            return $models->values();
+        }
+
+        // sort models by tnt search result set
+        return $model->newCollection($results['ids'])->map(function ($hit) use ($models) {
+            if (isset($models[$hit])) {
+                return $models[$hit];
+            }
+        })->filter()->values();
+    }
+
+    /**
      * Return query builder either from given constraints, or as
      * new query. Add where statements to builder when given.
      *
@@ -255,7 +297,7 @@ class TNTSearchEngine extends Engine
         if (empty($results['ids'])) {
             return collect();
         }
-        
+
         return collect($results['ids'])->values();
     }
 
@@ -421,6 +463,32 @@ class TNTSearchEngine extends Engine
         if (file_exists($pathToIndex)) {
             unlink($pathToIndex);
         }
+    }
+
+
+    /**
+     * Create a search index.
+     *
+     * @param  string  $name
+     * @param  array  $options
+     * @return mixed
+     *
+     * @throws \Exception
+     */
+    public function createIndex($name, array $options = [])
+    {
+        throw new Exception('TNT indexes are created automatically upon adding objects.');
+    }
+
+    /**
+     * Delete a search index.
+     *
+     * @param  string  $name
+     * @return mixed
+     */
+    public function deleteIndex($name)
+    {
+        throw new Exception(sprintf('TNT indexes cannot reliably be removed. Please manually remove the file in %s/%s.index', config('scout.tntsearch.storage'), $name));
     }
 
     /**
