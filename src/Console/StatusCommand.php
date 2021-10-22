@@ -141,7 +141,7 @@ class StatusCommand extends Command
     private function isSearchableModel($trait)
     {
         return function ($className) use ($trait) {
-            $traits = class_uses($className);
+            $traits = class_uses_recursive($className);
 
             return isset($traits[$trait]);
         };
