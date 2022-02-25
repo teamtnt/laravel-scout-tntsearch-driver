@@ -8,19 +8,21 @@
         "laravel"
     ],
     "license": "MIT",
-    "authors": [{
-        "name": "TNT Studio",
-        "email": "info@tntstudio.hr"
-    }],
+    "authors": [
+        {
+            "name": "TNT Studio",
+            "email": "info@tntstudio.hr"
+        }
+    ],
     "require": {
         "php": ">=7.1|^8",
-        "teamtnt/tntsearch": "2.7.0",
+        "teamtnt/tntsearch": "2.7.0|^2.8",
         "laravel/scout": "7.*|^8.0|^8.3|^9.0",
-        "illuminate/bus": "~5.4|^6.0|^7.0|^8.0",
-        "illuminate/contracts": "~5.4|^6.0|^7.0|^8.0",
-        "illuminate/pagination": "~5.4|^6.0|^7.0|^8.0",
-        "illuminate/queue": "~5.4|^6.0|^7.0|^8.0",
-        "illuminate/support": "~5.4|^6.0|^7.0|^8.0"
+        "illuminate/bus": "~5.4|^6.0|^7.0|^8.0|^9.0",
+        "illuminate/contracts": "~5.4|^6.0|^7.0|^8.0|^9.0",
+        "illuminate/pagination": "~5.4|^6.0|^7.0|^8.0|^9.0",
+        "illuminate/queue": "~5.4|^6.0|^7.0|^8.0|^9.0",
+        "illuminate/support": "~5.4|^6.0|^7.0|^8.0|^9.0"
     },
     "require-dev": {
         "mockery/mockery": "^1.0",
