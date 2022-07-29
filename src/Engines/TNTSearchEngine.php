@@ -197,7 +197,7 @@ class TNTSearchEngine extends Engine
     public function map(Builder $builder, $results, $model)
     {
         if (empty($results['ids'])) {
-            return Collection::make();
+            return $model->newCollection([]);
         }
 
         $keys = collect($results['ids'])->values()->all();
