@@ -218,11 +218,11 @@ class TNTSearchEngine extends Engine
         }
 
         // sort models by tnt search result set
-        return $model->newCollection($results['ids'])->map(function ($hit, $key) use ($models, $results) {
+        return $model->newCollection(collect($results['ids'])->map(function ($hit) use ($models, $results) {
             if (isset($models[$hit])) {
                 return $models[$hit]->setAttribute('__tntSearchScore__', $results['docScores'][$hit]);
             }
-        })->filter()->values();
+        })->filter()->all());
     }
 
     /**
