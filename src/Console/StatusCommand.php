@@ -4,11 +4,9 @@ namespace TeamTNT\Scout\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Events\Dispatcher;
-use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
-use TeamTNT\TNTSearch\Indexer\TNTIndexer;
-use TeamTNT\TNTSearch\TNTSearch;
-use Illuminate\Support\Facades\Schema;
 use Symfony\Component\Finder\Finder;
+use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
+use TeamTNT\TNTSearch\TNTSearch;
 
 class StatusCommand extends Command
 {
@@ -89,7 +87,9 @@ class StatusCommand extends Command
     {
 
         if (self::$declaredClasses === null) {
-            $configFiles = Finder::create()->files()->name('*.php')->notName('*.blade.php')->in(app()->path());
+            $configFiles = Finder::create()->files()
+                ->name('*.php')->notName('*.blade.php')
+                ->in(config('scout.tntsearch.modelPath', app()->path()));
 
             foreach ($configFiles->files() as $file) {
                 try {
