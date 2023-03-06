@@ -148,6 +148,15 @@ Or you can pass a searchable model argument:
 
 `php artisan scout:status "App\Models\Post"`
 
+If your models are not in the default location `app` or one of its subdirectories, you may set the `modelPath` option
+```php
+// config/scout.php
+'tntsearch' => [
+    // ...
+    'modelPath' => 'models',
+],
+```
+
 ![Image of Scout Status Command](https://teamtnt.github.io/img/scout_status_single_new.png)
 
 ## Constraints
