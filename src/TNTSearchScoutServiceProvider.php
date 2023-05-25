@@ -52,6 +52,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
         $tnt->fuzzy_distance       = config('scout.tntsearch.fuzzy.distance', $tnt->fuzzy_distance);
         $tnt->fuzzy_prefix_length  = config('scout.tntsearch.fuzzy.prefix_length', $tnt->fuzzy_prefix_length);
         $tnt->fuzzy_max_expansions = config('scout.tntsearch.fuzzy.max_expansions', $tnt->fuzzy_max_expansions);
+	$tnt->fuzzy_no_limit = config('scout.tntsearch.fuzzy.no_limit', $tnt->fuzzy_no_limit);
     }
 
     protected function setAsYouType($tnt)
