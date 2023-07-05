@@ -56,14 +56,22 @@ class ImportCommand extends Command
 
         $fields = array_intersect($desiredColumns, $availableColumns);
 
-        $query = $db->table($model->getTable());
+        $query = $model::query();
 
         if ($fields) {
             $query->select($model->getKeyName())
                 ->addSelect($fields);
         }
 
-        $indexer->query($query->toSql());
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        foreach ($bindings as $binding) {
+            $value = is_numeric($binding) ? $binding : "'{$binding}'";
+            $sql = preg_replace('/\?/', $value, $sql, 1);
+        }
+
+        $indexer->query($sql);
 
         $indexer->run();
         $this->info('All ['.$class.'] records have been imported.');
