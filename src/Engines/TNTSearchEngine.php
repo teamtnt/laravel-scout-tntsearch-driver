@@ -57,7 +57,6 @@ class TNTSearchEngine extends Engine
         $index = $this->tnt->getIndex();
         $index->setPrimaryKey($models->first()->getKeyName());
 
-        $index->indexBeginTransaction();
         $models->each(function ($model) use ($index) {
             $array = $model->toSearchableArray();
 
@@ -71,7 +70,6 @@ class TNTSearchEngine extends Engine
                 $index->insert($array);
             }
         });
-        $index->indexEndTransaction();
     }
 
     /**
@@ -317,7 +315,13 @@ class TNTSearchEngine extends Engine
     {
         $indexName = $model->searchableAs();
 
-        if (!file_exists($this->tnt->config['storage']."/{$indexName}.index")) {
+        if ($this->tnt->config['engine'] == "TeamTNT\TNTSearch\Engines\RedisEngine") {
+            $indexer->setDatabaseHandle($model->getConnection()->getPdo());
+            $indexer->setPrimaryKey($model->getKeyName());
+            return;
+        }
+
+        if (!file_exists($this->tnt->config['storage'] . "/{$indexName}.index")) {
             $indexer = $this->tnt->createIndex("$indexName.index");
             $indexer->setDatabaseHandle($model->getConnection()->getPdo());
             $indexer->setPrimaryKey($model->getKeyName());
@@ -342,7 +346,7 @@ class TNTSearchEngine extends Engine
     private function discardIdsFromResultSetByConstraints($builder, $searchResults)
     {
         $qualifiedKeyName    = $builder->model->getQualifiedKeyName(); // tableName.id
-        $subQualifiedKeyName = 'sub.'.$builder->model->getKeyName(); // sub.id
+        $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
 
         $sub = $this->getBuilder($builder->model)->whereIn(
             $qualifiedKeyName, $searchResults
@@ -350,7 +354,7 @@ class TNTSearchEngine extends Engine
 
         $discardIds = $builder->model->newQuery()
             ->select($qualifiedKeyName)
-            ->leftJoin(DB::raw('('.$sub->getQuery()->toSql().') as '.$builder->model->getConnection()->getTablePrefix().'sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
+            ->leftJoin(DB::raw('(' . $sub->getQuery()->toSql() . ') as ' . $builder->model->getConnection()->getTablePrefix() . 'sub'), $subQualifiedKeyName, '=', $qualifiedKeyName)
             ->addBinding($sub->getQuery()->getBindings(), 'join')
             ->whereIn($qualifiedKeyName, $searchResults)
             ->whereNull($subQualifiedKeyName)
@@ -459,12 +463,11 @@ class TNTSearchEngine extends Engine
     public function flush($model)
     {
         $indexName   = $model->searchableAs();
-        $pathToIndex = $this->tnt->config['storage']."/{$indexName}.index";
+        $pathToIndex = $this->tnt->config['storage'] . "/{$indexName}.index";
         if (file_exists($pathToIndex)) {
             unlink($pathToIndex);
         }
     }
-
 
     /**
      * Create a search index.

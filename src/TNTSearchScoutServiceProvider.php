@@ -1,12 +1,12 @@
 <?php namespace TeamTNT\Scout;
 
-use TeamTNT\Scout\Console\StatusCommand;
-use TeamTNT\TNTSearch\TNTSearch;
-use Laravel\Scout\EngineManager;
-use Laravel\Scout\Builder;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Scout\Builder;
+use Laravel\Scout\EngineManager;
 use TeamTNT\Scout\Console\ImportCommand;
+use TeamTNT\Scout\Console\StatusCommand;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
+use TeamTNT\TNTSearch\TNTSearch;
 
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
@@ -40,7 +40,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
             ]);
         }
 
-        Builder::macro('constrain', function($constraints) {
+        Builder::macro('constrain', function ($constraints) {
             $this->constraints = $constraints;
             return $this;
         });
@@ -48,15 +48,15 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
 
     protected function setFuzziness($tnt)
     {
-        $tnt->fuzziness            = config('scout.tntsearch.fuzziness', $tnt->fuzziness);
-        $tnt->fuzzy_distance       = config('scout.tntsearch.fuzzy.distance', $tnt->fuzzy_distance);
-        $tnt->fuzzy_prefix_length  = config('scout.tntsearch.fuzzy.prefix_length', $tnt->fuzzy_prefix_length);
-        $tnt->fuzzy_max_expansions = config('scout.tntsearch.fuzzy.max_expansions', $tnt->fuzzy_max_expansions);
-	$tnt->fuzzy_no_limit = config('scout.tntsearch.fuzzy.no_limit', $tnt->fuzzy_no_limit);
+        $tnt->setFuzziness(config('scout.tntsearch.fuzziness', $tnt->getFuzziness()));
+        $tnt->setFuzzyDistance(config('scout.tntsearch.fuzzy.distance', $tnt->getFuzzyDistance()));
+        $tnt->setFuzzyPrefixLength(config('scout.tntsearch.fuzzy.prefix_length', $tnt->getFuzzyPrefixLength()));
+        $tnt->setFuzzyMaxExpansions(config('scout.tntsearch.fuzzy.max_expansions', $tnt->getFuzzyMaxExpansions()));
+        $tnt->setFuzzyNoLimit(config('scout.tntsearch.fuzzy.no_limit', $tnt->getFuzzyNoLimit()));
     }
 
     protected function setAsYouType($tnt)
     {
-        $tnt->asYouType = config('scout.tntsearch.asYouType', $tnt->asYouType);
+        $tnt->setAsYouType(config('scout.tntsearch.asYouType', $tnt->getAsYouType()));
     }
 }
