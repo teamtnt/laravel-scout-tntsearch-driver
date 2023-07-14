@@ -316,8 +316,6 @@ class TNTSearchEngine extends Engine
         $indexName = $model->searchableAs();
 
         if ($this->tnt->config['engine'] == "TeamTNT\TNTSearch\Engines\RedisEngine") {
-            $indexer->setDatabaseHandle($model->getConnection()->getPdo());
-            $indexer->setPrimaryKey($model->getKeyName());
             return;
         }
 
