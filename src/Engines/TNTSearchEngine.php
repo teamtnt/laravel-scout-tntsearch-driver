@@ -151,6 +151,11 @@ class TNTSearchEngine extends Engine
      */
     protected function performSearch(Builder $builder, array $options = [])
     {
+        $driver = config('database.default');
+        $config = config('scout.tntsearch') + config("database.connections.{$driver}");
+
+        $this->tnt->loadConfig($config);
+        
         $index = $builder->index ?: $builder->model->searchableAs();
         $limit = $builder->limit ?: 10000;
         $this->tnt->selectIndex("{$index}.index");
