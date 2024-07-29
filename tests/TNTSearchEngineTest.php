@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
-use TeamTNT\TNTSearch\TNTSearch;
+use TeamTNT\Scout\ExtendedTNTSearch as TNTSearch;
 
 class TNTSearchEngineTest extends TestCase
 {
@@ -20,11 +20,10 @@ class TNTSearchEngineTest extends TestCase
         $engine = new TeamTNT\Scout\Engines\TNTSearchEngine($tnt);
 
         $engine->addFilter("query_expansion", function ($query, $model) {
-            if ($query == "test" && $model == "TeamTNT\TNTSearch\TNTSearch") {
-                return "modified-".$query;
+            if ($query == "test" && $model == "TeamTNT\Scout\ExtendedTNTSearch") {
+                return "modified-" . $query;
             }
             return $query;
-
         });
 
         $query  = $engine->applyFilters('query_expansion', "test", TNTSearch::class);
