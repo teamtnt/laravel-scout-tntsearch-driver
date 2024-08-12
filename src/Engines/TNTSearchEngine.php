@@ -58,6 +58,10 @@ class TNTSearchEngine extends Engine
         $index->setPrimaryKey($models->first()->getKeyName());
 
         $models->each(function ($model) use ($index) {
+            if (method_exists($model, 'shouldBeSearchable') && ! $model->shouldBeSearchable()) {
+                return;
+            }
+            
             $array = $model->toSearchableArray();
 
             if (empty($array)) {
