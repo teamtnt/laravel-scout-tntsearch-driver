@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
 use InvalidArgumentException;
 use Laravel\Scout\Builder;
+use TeamTNT\Scout\Engines\ExtendedScoutBuilder;
 use Laravel\Scout\Engines\Engine;
 use TeamTNT\Scout\Events\SearchPerformed;
 use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
-use TeamTNT\TNTSearch\TNTSearch;
+use TeamTNT\Scout\ExtendedTNTSearch as TNTSearch;
 
 class TNTSearchEngine extends Engine
 {
@@ -24,7 +25,7 @@ class TNTSearchEngine extends Engine
     protected $tnt;
 
     /**
-     * @var Builder
+     * @var ExtendedScoutBuilder
      */
     protected $builder;
 
@@ -180,7 +181,6 @@ class TNTSearchEngine extends Engine
             $res = $this->tnt->searchBoolean($builder->query, $limit);
             event(new SearchPerformed($builder, $res, true));
             return $res;
-
         } else {
             $res = $this->tnt->search($builder->query, $limit);
             event(new SearchPerformed($builder, $res));
@@ -211,7 +211,8 @@ class TNTSearchEngine extends Engine
         }
 
         $models = $builder->whereIn(
-            $model->getQualifiedKeyName(), $keys
+            $model->getQualifiedKeyName(),
+            $keys
         )->get()->keyBy($model->getKeyName());
 
         // sort models by user choice
@@ -254,7 +255,8 @@ class TNTSearchEngine extends Engine
         }
 
         $models = $builder->whereIn(
-            $model->getQualifiedKeyName(), $keys
+            $model->getQualifiedKeyName(),
+            $keys
         )->get()->keyBy($model->getKeyName());
 
         // sort models by user choice
@@ -355,7 +357,8 @@ class TNTSearchEngine extends Engine
         $subQualifiedKeyName = 'sub.' . $builder->model->getKeyName(); // sub.id
 
         $sub = $this->getBuilder($builder->model)->whereIn(
-            $qualifiedKeyName, $searchResults
+            $qualifiedKeyName,
+            $searchResults
         ); // sub query for left join
 
         $discardIds = $builder->model->newQuery()

@@ -4,7 +4,7 @@ namespace TeamTNT\Scout\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Events\Dispatcher;
-use TeamTNT\TNTSearch\TNTSearch;
+use TeamTNT\Scout\ExtendedTNTSearch as TNTSearch;
 use Illuminate\Support\Facades\Schema;
 
 class ImportCommand extends Command
@@ -43,12 +43,12 @@ class ImportCommand extends Command
         $tnt->loadConfig($config);
         $tnt->setDatabaseHandle($db->getPdo());
 
-        if(!$model->count()) {
+        if (!$model->count()) {
             $this->info('Nothing to import.');
             exit(0);
         }
-        
-        $indexer = $tnt->createIndex($model->searchableAs().'.index');
+
+        $indexer = $tnt->createIndex($model->searchableAs() . '.index');
         $indexer->setPrimaryKey($model->getKeyName());
 
         $availableColumns = Schema::connection($driver)->getColumnListing($model->getTable());
@@ -74,6 +74,6 @@ class ImportCommand extends Command
         $indexer->query($sql);
 
         $indexer->run();
-        $this->info('All ['.$class.'] records have been imported.');
+        $this->info('All [' . $class . '] records have been imported.');
     }
 }
