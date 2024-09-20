@@ -130,18 +130,9 @@ class TNTSearchEngine extends Engine
         $filtered = $this->discardIdsFromResultSetByConstraints($builder, $results['ids']);
 
         $results['hits'] = $filtered->count();
-
-        $chunks = array_chunk($filtered->toArray(), $perPage);
-
-        if (empty($chunks)) {
-            return $results;
-        }
-
-        if (array_key_exists($page - 1, $chunks)) {
-            $results['ids'] = $chunks[$page - 1];
-        } else {
-            $results['ids'] = [];
-        }
+        $results['ids'] = $filtered->toArray();
+        $results['per_page'] = $perPage;
+        $results['page'] = $page;
 
         return $results;
     }
@@ -210,23 +201,45 @@ class TNTSearchEngine extends Engine
             call_user_func($this->builder->queryCallback, $builder);
         }
 
+        // sort models by user choice
+        if (!empty($this->builder->orders)) {
+            if (isset($results['per_page'])) {
+                return collect($builder->whereIn(
+                    $model->getQualifiedKeyName(), $keys
+                )->paginate(
+                    perPage: $results['per_page'],
+                    pageName: 'page',
+                    page: $results['page']
+                )->items());
+            } else {
+                return $builder->whereIn(
+                    $model->getQualifiedKeyName(), $keys
+                )->get()->values();
+            }
+        }
+
+        // sort models by tnt search result set
+        if (isset($results['per_page'])) {
+            $chunks = array_chunk($keys, $results['per_page']);
+
+            if (empty($chunks)) {
+                return $results;
+            }
+
+            if (array_key_exists($results['page'] - 1, $chunks)) {
+                $keys = $chunks[$results['page'] - 1];
+            } else {
+                $keys = [];
+            }
+        }
+
         $models = $builder->whereIn(
             $model->getQualifiedKeyName(), $keys
         )->get()->keyBy($model->getKeyName());
 
-        // sort models by user choice
-        if (!empty($this->builder->orders)) {
-            return $models->values();
-        }
-
-        // sort models by tnt search result set
-        return $model->newCollection(collect($results['ids'])->map(function ($hit) use ($models, $results) {
+        return $model->newCollection(collect($keys)->map(function ($hit) use ($models, $results) {
             if (isset($models[$hit])) {
-                if (isset($this->tnt->config['searchBoolean']) ? $this->tnt->config['searchBoolean'] : false) {
-                    return $models[$hit];
-                } else {
-                    return $models[$hit]->setAttribute('__tntSearchScore__', $results['docScores'][$hit]);
-                }
+                return $models[$hit]->setAttribute('__tntSearchScore__', $results['docScores'][$hit]);
             }
         })->filter()->all());
     }
