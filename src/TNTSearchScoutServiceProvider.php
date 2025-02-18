@@ -1,4 +1,6 @@
-<?php namespace TeamTNT\Scout;
+<?php
+
+namespace TeamTNT\Scout;
 
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\Builder;
@@ -6,10 +8,12 @@ use Laravel\Scout\EngineManager;
 use TeamTNT\Scout\Console\ImportCommand;
 use TeamTNT\Scout\Console\StatusCommand;
 use TeamTNT\Scout\Engines\TNTSearchEngine;
-use TeamTNT\TNTSearch\TNTSearch;
+use TeamTNT\Scout\ExtendedTNTSearch as TNTSearch;
 
 class TNTSearchScoutServiceProvider extends ServiceProvider
 {
+    public $constraints;
+
     /**
      * Bootstrap any application services.
      *

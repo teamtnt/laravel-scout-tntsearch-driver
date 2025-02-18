@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Events\Dispatcher;
 use Symfony\Component\Finder\Finder;
 use TeamTNT\TNTSearch\Exceptions\IndexNotFoundException;
-use TeamTNT\TNTSearch\TNTSearch;
+use TeamTNT\Scout\ExtendedTNTSearch as TNTSearch;
 
 class StatusCommand extends Command
 {
@@ -42,7 +42,7 @@ class StatusCommand extends Command
 
         $searchableModels = $this->getSearchableModels();
 
-        $this->output->text('🔎 Analysing information from: <info>['.implode(',', $searchableModels).']</info>');
+        $this->output->text('🔎 Analysing information from: <info>[' . implode(',', $searchableModels) . ']</info>');
         $this->output->newLine();
         $this->output->progressStart(count($searchableModels));
 
@@ -52,7 +52,7 @@ class StatusCommand extends Command
             $model = new $class();
 
             $tnt = $this->loadTNTEngine($model);
-            $indexName = $model->searchableAs().'.index';
+            $indexName = $model->searchableAs() . '.index';
 
             try {
                 $tnt->selectIndex($indexName);
@@ -66,14 +66,13 @@ class StatusCommand extends Command
 
             $indexedColumns = $rowsTotal ? implode(",", array_keys($model->first()->toSearchableArray())) : '';
 
-            if($recordsDifference == 0) {
+            if ($recordsDifference == 0) {
                 $recordsDifference = '<fg=green>Synchronized</>';
             } else {
                 $recordsDifference = "<fg=red>$recordsDifference</>";
             }
 
             array_push($rows, [$class, $indexName, $indexedColumns, $rowsIndexed, $rowsTotal, $recordsDifference]);
-
         }
 
         $this->output->progressFinish();
