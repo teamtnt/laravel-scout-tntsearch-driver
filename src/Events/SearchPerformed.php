@@ -1,9 +1,17 @@
 <?php
-
 namespace TeamTNT\Scout\Events;
 
 class SearchPerformed
 {
+    public $query;
+    public $isBooleanSearch;
+    public $indexName;
+    public $model;
+    public $ids;
+    public $hits;
+    public $execution_time;
+    public $driver;
+
     public function __construct($builder, $results, $isBooleanSearch = false)
     {
         $this->query           = $builder->query;
