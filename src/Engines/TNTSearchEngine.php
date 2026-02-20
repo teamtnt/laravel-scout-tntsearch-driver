@@ -61,7 +61,7 @@ class TNTSearchEngine extends Engine
             if (method_exists($model, 'shouldBeSearchable') && ! $model->shouldBeSearchable()) {
                 return;
             }
-            
+
             $array = $model->toSearchableArray();
 
             if (empty($array)) {
@@ -202,6 +202,8 @@ class TNTSearchEngine extends Engine
             return $model->newCollection([]);
         }
 
+        $this->builder = $builder;
+
         $keys = collect($results['ids'])->values()->all();
 
         $builder = $this->getBuilder($model);
@@ -244,6 +246,8 @@ class TNTSearchEngine extends Engine
         if (empty($results['ids'])) {
             return LazyCollection::make();
         }
+
+        $this->builder = $builder;
 
         $keys = collect($results['ids'])->values()->all();
 
