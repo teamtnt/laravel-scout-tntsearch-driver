@@ -399,31 +399,51 @@ class TNTSearchEngine extends Engine
         // does not show soft deleted items when trait is attached to model and
         // config('scout.soft_delete') is false
         if (!$this->usesSoftDelete($model) || !config('scout.soft_delete', true)) {
-            unset($this->builder->wheres['__soft_deleted']);
+            $this->removeSoftDeleteWhere();
             return $builder;
         }
+
+        $softDeleteWhere = $this->findSoftDeleteWhere();
 
         /**
          * Use standard behaviour of Laravel Scout builder class to support soft deletes.
          *
          * When no __soft_deleted statement is given return all entries
          */
-        if (!array_key_exists('__soft_deleted', $this->builder->wheres)) {
+        if ($softDeleteWhere === null) {
             return $builder->withTrashed();
         }
 
         /**
          * When __soft_deleted is 1 then return only soft deleted entries
          */
-        if ($this->builder->wheres['__soft_deleted']) {
+        if ($softDeleteWhere['value']) {
             $builder = $builder->onlyTrashed();
         }
 
         /**
          * Returns all undeleted entries, default behaviour
          */
-        unset($this->builder->wheres['__soft_deleted']);
+        $this->removeSoftDeleteWhere();
         return $builder;
+    }
+
+    private function findSoftDeleteWhere()
+    {
+        foreach ($this->builder->wheres as $where) {
+            if (is_array($where) && isset($where['field']) && $where['field'] === '__soft_deleted') {
+                return $where;
+            }
+        }
+        return null;
+    }
+
+    private function removeSoftDeleteWhere()
+    {
+        $this->builder->wheres = array_values(array_filter(
+            $this->builder->wheres,
+            fn ($where) => !is_array($where) || !isset($where['field']) || $where['field'] !== '__soft_deleted'
+        ));
     }
 
     /**
@@ -434,14 +454,13 @@ class TNTSearchEngine extends Engine
      */
     private function applyWheres($builder)
     {
-        // iterate over given where clauses
-        return collect($this->builder->wheres)->map(function ($value, $key) {
-            // for reduce function combine key and value into array
-            return [$key, $value];
-        })->reduce(function ($builder, $where) {
-            // separate key, value again
-            list($key, $value) = $where;
-            return $builder->where($key, $value);
+        // iterate over given where clauses (Scout 11+ format: array of arrays with field/operator/value)
+        return collect($this->builder->wheres)->reduce(function ($builder, $where) {
+            if (is_array($where) && isset($where['field'])) {
+                $operator = $where['operator'] ?? '=';
+                return $builder->where($where['field'], $operator, $where['value']);
+            }
+            return $builder;
         }, $builder);
     }
 
