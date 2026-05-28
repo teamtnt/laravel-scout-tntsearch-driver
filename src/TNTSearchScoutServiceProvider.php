@@ -29,8 +29,14 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
             $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
             $tnt->engine->maxDocs = config('scout.tntsearch.maxDocs', 500);
 
-            $this->setFuzziness($tnt);
-            $this->setAsYouType($tnt);
+            // Call via the fully-qualified class. Laravel 13's Manager::extend rebinds
+            // the closure's $this AND its scope to the Manager, so $this->setFuzziness()
+            // would proxy through Manager::__call -> $this->driver()->setFuzziness(...),
+            // which recursively invokes this same closure and exhausts memory.
+            // self::setFuzziness() falls into the same trap because PHP resolves it via
+            // the closure's rebound scope.
+            TNTSearchScoutServiceProvider::setFuzziness($tnt);
+            TNTSearchScoutServiceProvider::setAsYouType($tnt);
 
             return new TNTSearchEngine($tnt);
         });
@@ -48,7 +54,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
         });
     }
 
-    protected function setFuzziness($tnt)
+    public static function setFuzziness($tnt)
     {
         $tnt->setFuzziness(config('scout.tntsearch.fuzziness', $tnt->getFuzziness()));
         $tnt->setFuzzyDistance(config('scout.tntsearch.fuzzy.distance', $tnt->getFuzzyDistance()));
@@ -57,7 +63,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
         $tnt->setFuzzyNoLimit(config('scout.tntsearch.fuzzy.no_limit', $tnt->getFuzzyNoLimit()));
     }
 
-    protected function setAsYouType($tnt)
+    public static function setAsYouType($tnt)
     {
         $tnt->setAsYouType(config('scout.tntsearch.asYouType', $tnt->getAsYouType()));
     }
