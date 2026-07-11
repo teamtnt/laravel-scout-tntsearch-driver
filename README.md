@@ -114,7 +114,8 @@ In your `config/scout.php` add:
 	// wordlist, picking the shortest/most popular matching term. All
 	// earlier words in the query still require exact matches. Useful
 	// for live/instant search inputs where the final word isn't
-	// finished yet.
+	// finished yet. Note this option can be used on a per model
+	// basis, see read me examples below.
     'asYouType' => false,
 
 	// When true, queries are parsed as boolean expressions instead of
@@ -158,8 +159,6 @@ add the following line to your `.gitignore` file.
 
 ```/storage/*.index```
 
-The `asYouType` option can be set per model basis, see the example below.
-
 ## Usage
 
 After you have installed scout and the TNTSearch driver, you need to add the
@@ -178,6 +177,7 @@ class Post extends Model
 {
     use Searchable;
 
+    // optionally override value set within config/scout, on a per model basis
     public $asYouType = true;
 
     /**
