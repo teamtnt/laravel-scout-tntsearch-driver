@@ -56,6 +56,7 @@ class TNTSearchEngine extends Engine
         $this->tnt->selectIndex("{$models->first()->searchableAs()}.index");
         $index = $this->tnt->getIndex();
         $index->setPrimaryKey($models->first()->getKeyName());
+        $this->applyStopWords($index);
 
         $models->each(function ($model) use ($index) {
             if (method_exists($model, 'shouldBeSearchable') && ! $model->shouldBeSearchable()) {
@@ -333,8 +334,22 @@ class TNTSearchEngine extends Engine
 
         if (!file_exists($this->tnt->config['storage'] . "/{$indexName}.index")) {
             $indexer = $this->tnt->createIndex("$indexName.index");
-            $indexer->setDatabaseHandle($model->getConnection()->getPdo());
+            $indexer->setDatabaseHandle($model->getConnection()->getReadPdo());
             $indexer->setPrimaryKey($model->getKeyName());
+            $this->applyStopWords($indexer);
+        }
+    }
+
+    /**
+     * Set the configured stopwords (scout.tntsearch.stopwords) on the indexer.
+     *
+     * @param \TeamTNT\TNTSearch\Indexer\TNTIndexer $indexer
+     * @return void
+     */
+    protected function applyStopWords($indexer)
+    {
+        if (!empty($this->tnt->config['stopwords']) && method_exists($indexer, 'setStopWords')) {
+            $indexer->setStopWords($this->tnt->config['stopwords']);
         }
     }
 

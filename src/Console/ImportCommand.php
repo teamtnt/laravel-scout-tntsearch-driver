@@ -41,7 +41,7 @@ class ImportCommand extends Command
         $db = app('db')->connection($driver);
 
         $tnt->loadConfig($config);
-        $tnt->setDatabaseHandle($db->getPdo());
+        $tnt->setDatabaseHandle($db->getReadPdo());
 
         if(!$model->count()) {
             $this->info('Nothing to import.');
@@ -50,6 +50,10 @@ class ImportCommand extends Command
         
         $indexer = $tnt->createIndex($model->searchableAs().'.index');
         $indexer->setPrimaryKey($model->getKeyName());
+
+        if (!empty($config['stopwords']) && method_exists($indexer, 'setStopWords')) {
+            $indexer->setStopWords($config['stopwords']);
+        }
 
         $availableColumns = Schema::connection($driver)->getColumnListing($model->getTable());
         $desiredColumns = array_keys($model->first()->toSearchableArray());

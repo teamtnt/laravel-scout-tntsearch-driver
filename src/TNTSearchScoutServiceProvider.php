@@ -26,7 +26,7 @@ class TNTSearchScoutServiceProvider extends ServiceProvider
             $config = config('scout.tntsearch') + config("database.connections.{$driver}");
 
             $tnt->loadConfig($config);
-            $tnt->setDatabaseHandle(app('db')->connection()->getPdo());
+            $tnt->setDatabaseHandle(app('db')->connection()->getReadPdo());
             $tnt->engine->maxDocs = config('scout.tntsearch.maxDocs', 500);
 
             // Call via the fully-qualified class. Laravel 13's Manager::extend rebinds

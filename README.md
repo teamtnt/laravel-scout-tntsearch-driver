@@ -82,8 +82,15 @@ In your `config/scout.php` add:
     'asYouType' => false,
     'searchBoolean' => env('TNTSEARCH_BOOLEAN', false),
     'maxDocs' => env('TNTSEARCH_MAX_DOCS', 500),
+    'stopwords' => [], //words to exclude from the index, e.g. ['a', 'the', 'in']
 ],
 ```
+
+The `stopwords` option lets you exclude common words (articles, prepositions) from
+being indexed, so a search for e.g. "inns" won't fuzzy-match documents that merely
+contain "in". Note that stopwords are applied at indexing time, so you need to
+reimport your models after changing them.
+
 To prevent your search indexes being commited to your project repository,
 add the following line to your `.gitignore` file.
 
