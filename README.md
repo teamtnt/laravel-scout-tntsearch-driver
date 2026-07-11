@@ -36,23 +36,25 @@ You can install the package via composer:
 composer require teamtnt/laravel-scout-tntsearch-driver
 ```
 
-Add the service provider:
+For Laravel 11+, add the Scout and TNTSearch service providers to `bootstrap/providers.php`:
 
 ```php
-// config/app.php
-'providers' => [
-    // ...
-    TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
-],
-```
-
-Ensure you have Laravel Scout as a provider too otherwise you will get an "unresolvable dependency" error
-
-```php
-// config/app.php
-'providers' => [
+return [
+    App\Providers\AppServiceProvider::class,
     // ...
     Laravel\Scout\ScoutServiceProvider::class,
+    TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
+];
+```
+
+For earlier versions of Laravel, add the service provider as follows:
+
+```php
+// config/app.php
+'providers' => [
+    // ...
+	Laravel\Scout\ScoutServiceProvider::class,
+    TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
 ],
 ```
 
