@@ -71,32 +71,93 @@ In your `config/scout.php` add:
 ```php
 
 'tntsearch' => [
-    'storage'  => storage_path(), //place where the index files will be stored
+    // Directory where the TNTSearch index files (SQLite .index files)
+	// are written and read from. Defaults to the app's storage path,
+	// but can be overridden via SCOUT_PATH if indexes should live
+	// elsewhere (e.g. a shared/mounted volume across instances)
+    'storage'  => storage_path(),
+
+	// Master switch for fuzzy (typo-tolerant) matching. When a query returns
+	// no exact hits (or 'no_limit' is true), terms are matched by
+	// Levenshtein distance instead of an exact match
     'fuzziness' => env('TNTSEARCH_FUZZINESS', false),
+
     'fuzzy' => [
+		// Number of leading characters of the search term that must
+		// match exactly before fuzzy comparison kicks in. Higher values
+		// narrow the candidate word list and speed up fuzzy lookups.
         'prefix_length' => 2,
+
+		// Caps how many candidate terms (from the index wordlist,
+		// ordered by popularity) are pulled and Levenshtein-compared
+		// against the search term. Lower is faster but may miss valid
+		// fuzzy matches; higher is more thorough but slower.
         'max_expansions' => 50,
+
+		// Maximum Levenshtein (edit) distance — the number of single
+		// character insertions, deletions or substitutions — allowed
+		// between the search term and a candidate indexed term for it
+		// to still count as a match. Lower is stricter (fewer typos
+		// tolerated); higher allows looser, less precise matches.
         'distance' => 2,
-	'no_limit' => true
+
+		// When true, fuzzy matching runs even if the exact search
+		// already found results, so fuzzy matches are always added to
+		// the result set. When false, fuzzy matching only kicks in as
+		// a fallback when the exact search finds nothing.
+	    'no_limit' => true,
     ],
+	
+	// When true, the last word of the query is treated as an
+	// incomplete word being typed: instead of requiring an exact
+	// match, it is matched as a prefix (term LIKE 'word%') against the
+	// wordlist, picking the shortest/most popular matching term. All
+	// earlier words in the query still require exact matches. Useful
+	// for live/instant search inputs where the final word isn't
+	// finished yet. Note this option can be used on a per model
+	// basis, see read me examples below.
     'asYouType' => false,
+
+	// When true, queries are parsed as boolean expressions instead of
+	// being ranked by relevance: spaces between words mean AND, " or "
+	// means OR, a leading "-" before a word means NOT/exclude, and
+	// parentheses can be used to group terms. Only documents matching
+	// the resulting expression are returned (no relevance ranking).
+	// 
+	// Boolean example:
+	//   "php -laravel" -> docs containing "php" but NOT "laravel"
+	//   "cat or dog" -> docs containing either "cat" or "dog"
+	// 
+	// When false (default), queries use TNTSearch's normal
+	// free-text search: all words are matched and results are ranked
+	// by relevance, with no special meaning for "or" or "-".
+	// 
+	// Non-boolean example:
+	//   "php -laravel" -> ranked results for the literal words "php" and "laravel"
     'searchBoolean' => env('TNTSEARCH_BOOLEAN', false),
+	
+	// Caps how many documents are fetched per matched keyword from the
+	// index (ordered by hit_count, i.e. most relevant first), before
+	// ranking/intersecting results. This is a per-term limit, not a
+	// limit on final results: if a term matches more than maxDocs
+	// documents, only the top maxDocs (by popularity) are considered,
+	// which can cause AND/OR boolean searches on very common words to
+	// miss legitimate matches. Lower values improve performance on
+	// large indexes at the cost of search completeness.
     'maxDocs' => env('TNTSEARCH_MAX_DOCS', 500),
-    'stopwords' => [], //words to exclude from the index, e.g. ['a', 'the', 'in']
+
+	// Words to exclude from the index, e.g. ['a', 'the', 'in']. The stopwords
+	// option lets you exclude common words (articles, prepositions) from
+	// being indexed, so a search for e.g. "inns" won't fuzzy-match documents
+	// that merely contain "in". Note that stopwords are applied at indexing
+	// time, so you need to reimport your models after changing them
+	'stopwords' => [],
 ],
 ```
-
-The `stopwords` option lets you exclude common words (articles, prepositions) from
-being indexed, so a search for e.g. "inns" won't fuzzy-match documents that merely
-contain "in". Note that stopwords are applied at indexing time, so you need to
-reimport your models after changing them.
-
 To prevent your search indexes being commited to your project repository,
 add the following line to your `.gitignore` file.
 
 ```/storage/*.index```
-
-The `asYouType` option can be set per model basis, see the example below.
 
 ## Usage
 
@@ -116,6 +177,7 @@ class Post extends Model
 {
     use Searchable;
 
+    // optionally override value set within config/scout, on a per model basis
     public $asYouType = true;
 
     /**
