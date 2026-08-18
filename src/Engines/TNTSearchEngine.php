@@ -424,50 +424,109 @@ class TNTSearchEngine extends Engine
         // does not show soft deleted items when trait is attached to model and
         // config('scout.soft_delete') is false
         if (!$this->usesSoftDelete($model) || !config('scout.soft_delete', true)) {
-            unset($this->builder->wheres['__soft_deleted']);
+            $this->removeSoftDeleteWhere();
             return $builder;
         }
+
+        $softDeleteWhere = $this->findSoftDeleteWhere();
 
         /**
          * Use standard behaviour of Laravel Scout builder class to support soft deletes.
          *
          * When no __soft_deleted statement is given return all entries
          */
-        if (!array_key_exists('__soft_deleted', $this->builder->wheres)) {
+        if ($softDeleteWhere === null) {
             return $builder->withTrashed();
         }
 
         /**
          * When __soft_deleted is 1 then return only soft deleted entries
          */
-        if ($this->builder->wheres['__soft_deleted']) {
+        if ($softDeleteWhere['value']) {
             $builder = $builder->onlyTrashed();
         }
 
         /**
          * Returns all undeleted entries, default behaviour
          */
-        unset($this->builder->wheres['__soft_deleted']);
+        $this->removeSoftDeleteWhere();
         return $builder;
+    }
+
+    /**
+     * Locate the __soft_deleted where clause, supporting both the Scout <=10
+     * associative format ([field => value]) and the Scout 11+ list format
+     * (['field' => ..., 'operator' => ..., 'value' => ...]).
+     *
+     * @return array|null  ['field' => ..., 'value' => ...] when present, null otherwise
+     */
+    private function findSoftDeleteWhere()
+    {
+        foreach ($this->builder->wheres as $key => $where) {
+            if (is_array($where) && array_key_exists('field', $where)) {
+                if ($where['field'] === '__soft_deleted') {
+                    return ['field' => '__soft_deleted', 'value' => $where['value'] ?? null];
+                }
+            } elseif ($key === '__soft_deleted') {
+                return ['field' => '__soft_deleted', 'value' => $where];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Remove the __soft_deleted where clause from the builder in either the
+     * Scout <=10 associative format or the Scout 11+ list format.
+     *
+     * @return void
+     */
+    private function removeSoftDeleteWhere()
+    {
+        $this->builder->wheres = collect($this->builder->wheres)
+            ->reject(function ($where, $key) {
+                if (is_array($where) && array_key_exists('field', $where)) {
+                    return $where['field'] === '__soft_deleted';
+                }
+
+                return $key === '__soft_deleted';
+            })
+            ->all();
     }
 
     /**
      * Apply where statements as constraints to the query builder.
      *
+     * Supports both the Scout <=10 associative format ([field => value]) and the
+     * Scout 11+ list format (['field' => ..., 'operator' => ..., 'value' => ...]).
+     *
      * @param Builder $builder
-     * @return \Illuminate\Support\Collection
+     * @return Builder
      */
     private function applyWheres($builder)
     {
-        // iterate over given where clauses
-        return collect($this->builder->wheres)->map(function ($value, $key) {
-            // for reduce function combine key and value into array
-            return [$key, $value];
-        })->reduce(function ($builder, $where) {
-            // separate key, value again
-            list($key, $value) = $where;
-            return $builder->where($key, $value);
-        }, $builder);
+        foreach ($this->builder->wheres as $key => $where) {
+            if (is_array($where) && array_key_exists('field', $where)) {
+                // Scout 11+ format
+                $column   = $where['field'];
+                $operator = $where['operator'] ?? '=';
+                $value    = $where['value'] ?? null;
+            } else {
+                // Scout <=10 format ([field => value])
+                $column   = $key;
+                $operator = '=';
+                $value    = $where;
+            }
+
+            // The __soft_deleted clause is handled separately by handleSoftDeletes()
+            if ($column === '__soft_deleted') {
+                continue;
+            }
+
+            $builder = $builder->where($column, $operator, $value);
+        }
+
+        return $builder;
     }
 
     /**
