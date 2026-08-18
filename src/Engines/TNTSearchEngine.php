@@ -302,6 +302,10 @@ class TNTSearchEngine extends Engine
 
         $builder = $this->applyWheres($builder);
 
+        $builder = $this->applyWhereIns($builder);
+
+        $builder = $this->applyWhereNotIns($builder);
+
         $builder = $this->applyOrders($builder);
 
         return $builder;
@@ -524,6 +528,42 @@ class TNTSearchEngine extends Engine
             }
 
             $builder = $builder->where($column, $operator, $value);
+        }
+
+        return $builder;
+    }
+
+    /**
+     * Apply "where in" statements as constraints to the query builder.
+     *
+     * Scout stores these as [field => [values]]. The property is absent on
+     * Scout versions that predate whereIn(), so it is guarded with `?? []`.
+     *
+     * @param Builder $builder
+     * @return Builder
+     */
+    private function applyWhereIns($builder)
+    {
+        foreach ($this->builder->whereIns ?? [] as $field => $values) {
+            $builder = $builder->whereIn($field, $values);
+        }
+
+        return $builder;
+    }
+
+    /**
+     * Apply "where not in" statements as constraints to the query builder.
+     *
+     * Scout stores these as [field => [values]]. The property is absent on
+     * Scout versions that predate whereNotIn(), so it is guarded with `?? []`.
+     *
+     * @param Builder $builder
+     * @return Builder
+     */
+    private function applyWhereNotIns($builder)
+    {
+        foreach ($this->builder->whereNotIns ?? [] as $field => $values) {
+            $builder = $builder->whereNotIn($field, $values);
         }
 
         return $builder;

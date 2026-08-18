@@ -75,6 +75,47 @@ class TNTSearchEngineTest extends TestCase
         $this->assertSame($query, $engine->getBuilder(new TNTSearchEngineTestModel));
     }
 
+    public function testAppliesWhereInAndWhereNotIn()
+    {
+        $engine = new TNTSearchEngine(new TNTSearch);
+
+        $query = m::mock('Illuminate\Database\Eloquent\Builder');
+        $query->shouldReceive('whereIn')->once()->with('country', ['US', 'BR'])->andReturnSelf();
+        $query->shouldReceive('whereNotIn')->once()->with('status', [0])->andReturnSelf();
+
+        $builder                = new stdClass;
+        $builder->constraints   = $query;
+        $builder->wheres        = [];
+        $builder->whereIns      = ['country' => ['US', 'BR']];
+        $builder->whereNotIns   = ['status' => [0]];
+        $builder->orders        = [];
+
+        $this->setProtected($engine, 'builder', $builder);
+
+        $this->assertSame($query, $engine->getBuilder(new TNTSearchEngineTestModel));
+    }
+
+    public function testWhereInAndWhereNotInAreOptionalForOlderScout()
+    {
+        // Scout <9.4 has no whereIns; Scout <10 has no whereNotIns. Missing
+        // properties must not error and must apply no constraint.
+        $engine = new TNTSearchEngine(new TNTSearch);
+
+        $query = m::mock('Illuminate\Database\Eloquent\Builder');
+        $query->shouldReceive('whereIn')->never();
+        $query->shouldReceive('whereNotIn')->never();
+
+        $builder              = new stdClass;
+        $builder->constraints = $query;
+        $builder->wheres      = [];
+        $builder->orders      = [];
+        // no whereIns / whereNotIns properties at all
+
+        $this->setProtected($engine, 'builder', $builder);
+
+        $this->assertSame($query, $engine->getBuilder(new TNTSearchEngineTestModel));
+    }
+
     public function testFindSoftDeleteWhereSupportsBothFormats()
     {
         $engine = new TNTSearchEngine(new TNTSearch);
